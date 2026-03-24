@@ -4,7 +4,7 @@
 
 This repository manages the **LAN Preservation Society Discord server** using Terraform infrastructure-as-code with the [`Lucky3028/discord`](https://registry.terraform.io/providers/Lucky3028/discord) provider.
 
-All Discord server structure changes (channels, roles, categories, permissions) are made by editing the Terraform files in `terraform/` and opening a Pull Request.  **Never apply changes directly** — always go through the PR pipeline so that `terraform plan` output is visible and approved before `terraform apply` runs.
+All Discord server structure changes (channels, roles, categories, permissions) are made by editing the Terraform files in `terraform/` and opening a Pull Request.  **Never apply changes directly** — always go through the PR pipeline. This repository uses HCP Terraform with VCS OAuth integration, so plan and apply runs are triggered automatically by HCP Terraform when PRs are opened or merged.
 
 ---
 
@@ -14,8 +14,7 @@ All Discord server structure changes (channels, roles, categories, permissions) 
 .github/
   agents/                     # Copilot agent definitions (see below)
   workflows/
-    pr-validation.yml         # Runs on every PR: fmt → validate → tflint → plan
-    terraform-apply.yml       # Runs on merge to main: terraform apply
+    pr-validation.yml         # Runs on every PR: fmt → validate → tflint
   CODEOWNERS                  # @farflungfish must review all changes
   PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
   copilot-instructions.md     # This file
@@ -60,9 +59,9 @@ README.md                     # Project overview
 1. Branch from `main`.
 2. Make Terraform changes in `terraform/`.
 3. Run `terraform fmt -recursive` locally.
-4. Open a PR — CI runs `fmt`, `validate`, `tflint`, and posts a `plan` comment.
+4. Open a PR — CI runs `fmt`, `validate`, and `tflint`. HCP Terraform automatically runs a speculative plan via VCS OAuth and posts it as a GitHub check.
 5. A code owner (see `CODEOWNERS`) must approve before merge.
-6. After merge, the apply workflow runs `terraform apply`.
+6. After merge, HCP Terraform automatically applies the changes via its VCS OAuth integration.
 
 ---
 
@@ -81,8 +80,8 @@ Agents are defined in `.github/agents/` and can be invoked in Copilot chat:
 
 ## Secrets Required
 
+This repository uses HCP Terraform's VCS OAuth integration. Plan and apply runs are triggered automatically — no Terraform credentials are needed in GitHub Actions secrets.
+
 | Secret | Description |
 |--------|-------------|
 | `DISCORD_TOKEN` | Discord bot token (mark as sensitive — never log or print) |
-| `TF_API_TOKEN` | Terraform Cloud API token |
-| `TF_CLOUD_ORGANIZATION` | Terraform Cloud organization name (repository variable) |
