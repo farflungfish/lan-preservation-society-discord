@@ -17,5 +17,6 @@ terraform {
 }
 
 provider "discord" {
-  token = var.discord_token
+  # Token is read from the DISCORD_TOKEN environment variable automatically.
+  # Set DISCORD_TOKEN as a workspace environment variable in HCP Terraform.
 }

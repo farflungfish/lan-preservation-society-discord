@@ -22,7 +22,7 @@ All server structure changes — channels, roles, categories, permissions — ar
   copilot-instructions.md     # Workspace instructions for GitHub Copilot
 terraform/
   versions.tf                 # Provider & Terraform version pins
-  variables.tf                # Input variables (token, server ID)
+  variables.tf                # Input variables (server ID)
   main.tf                     # Roles, categories, channels
   outputs.tf                  # Exported resource IDs
   terraform.tfvars.example    # Template — copy to terraform.tfvars locally
@@ -105,4 +105,4 @@ This repository uses HCP Terraform's VCS OAuth integration. Plan and apply runs 
 
 | Type | Name | Location | Description |
 |------|------|----------|-------------|
-| Secret | `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token (used by HCP Terraform workspace variable) |
+| Environment variable | `DISCORD_TOKEN` | HCP Terraform → Workspace → Variables → Environment Variables | Discord bot token (sensitive). The provider reads this automatically — do **not** set it as a Terraform variable. |
