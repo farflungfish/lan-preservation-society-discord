@@ -8,7 +8,6 @@ resource "discord_role" "admin" {
   hoist       = true
   mentionable = true
   permissions = 8 # Administrator
-  position    = 5
 }
 
 resource "discord_role" "moderator" {
@@ -18,7 +17,6 @@ resource "discord_role" "moderator" {
   hoist       = true
   mentionable = true
   permissions = 1275853888 # Manage messages, kick, ban, mute, deafen, move members
-  position    = 4
 }
 
 resource "discord_role" "bot" {
@@ -28,7 +26,6 @@ resource "discord_role" "bot" {
   hoist       = true
   mentionable = false
   permissions = 805306368 # Send messages, embed links, attach files, read message history
-  position    = 3
 }
 
 resource "discord_role" "member" {
@@ -38,7 +35,6 @@ resource "discord_role" "member" {
   hoist       = false
   mentionable = false
   permissions = 104324160 # View channels, send messages, read message history, add reactions, connect, speak
-  position    = 2
 }
 
 # ---------------------------------------------------------------------------

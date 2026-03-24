@@ -15,19 +15,24 @@ This repository has GitHub Copilot agents that guide you from idea to merged PR 
 1. **Open a Copilot chat** in your editor or on GitHub.com.
 
 2. **Describe what you want to change** using the `@issue-consultant` agent:
-   ```
+
+   ```text
    @issue-consultant I'd like to add a voice channel for movie nights under the GENERAL category.
    ```
+
    The agent will ask clarifying questions and create a structured GitHub Issue.
 
 3. **Implement the change** using the `@terraform-developer` agent:
-   ```
+
+   ```text
    @terraform-developer Please implement issue #12.
    ```
+
    The agent will write the Terraform code and open a draft PR.
 
 4. **Review the PR** using the `@code-reviewer` agent:
-   ```
+
+   ```text
    @code-reviewer Review PR #13 for correctness and best practices.
    ```
 
@@ -62,4 +67,4 @@ If you are comfortable with Terraform:
 |------|--------|------|
 | farflungfish | [@farflungfish](https://github.com/farflungfish) | Maintainer |
 
-_Want your name here? Open a PR!_
+*Want your name here? Open a PR!*

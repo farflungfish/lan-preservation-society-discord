@@ -10,7 +10,7 @@ All Discord server structure changes (channels, roles, categories, permissions) 
 
 ## Repository Layout
 
-```
+```text
 .github/
   agents/                     # Copilot agent definitions (see below)
   workflows/
