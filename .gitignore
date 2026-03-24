@@ -1,0 +1,11 @@
+# Terraform variables — sensitive values, never committed
+terraform.tfvars
+
+# Terraform local state and cache
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfplan
+
+# macOS
+.DS_Store

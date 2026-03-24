@@ -1,0 +1,8 @@
+# Global owner — required reviewer for all changes
+* @farflungfish
+
+# Terraform infrastructure requires explicit sign-off
+/terraform/ @farflungfish
+
+# Pipeline and workflow changes require explicit sign-off
+/.github/workflows/ @farflungfish
