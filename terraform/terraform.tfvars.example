@@ -1,5 +1,14 @@
 # Copy this file to terraform.tfvars and fill in real values.
 # NEVER commit terraform.tfvars — it is listed in .gitignore.
 
-# discord_token = "your-discord-bot-token-here"
-# server_id     = "1486014276274753697"
+# server_id = "1486014276274753697"
+
+# NOTE: The Discord bot token is NOT set here.
+# The Lucky3028/discord provider reads it automatically from the
+# DISCORD_TOKEN environment variable.
+#
+# For local development, export the variable before running Terraform:
+#   export DISCORD_TOKEN="your-discord-bot-token-here"
+#
+# In HCP Terraform, set DISCORD_TOKEN as a sensitive environment variable
+# in the workspace settings (not as a Terraform variable).

@@ -38,7 +38,7 @@ This repository has GitHub Copilot agents that guide you from idea to merged PR 
 If you are comfortable with Terraform:
 
 1. Fork the repository and create a feature branch from `main`.
-2. Copy `terraform/terraform.tfvars.example` → `terraform/terraform.tfvars` and fill in your credentials.
+2. Export the Discord bot token as an environment variable: `export DISCORD_TOKEN="your-token-here"`.
 3. Make changes in `terraform/`.
 4. Run `terraform fmt -recursive` and `terraform validate` locally.
 5. Open a Pull Request.  The CI pipeline will run `fmt`, `validate`, and `tflint`. HCP Terraform will automatically run a speculative plan and post the result as a GitHub check.
