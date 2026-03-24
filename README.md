@@ -8,7 +8,7 @@ All server structure changes — channels, roles, categories, permissions — ar
 
 ## Repository Layout
 
-```
+```text
 .github/
   agents/                     # GitHub Copilot agent definitions
     issue-consultant.md       # Turns plain-English requests into GitHub Issues
@@ -51,19 +51,24 @@ You do **not** need to know Terraform to contribute.  This repository uses **Git
 ### Using GitHub Copilot to Contribute
 
 1. **Describe your change** — Open a Copilot chat and say:
-   ```
+
+   ```text
    @issue-consultant I'd like to add a #resources channel under PRESERVATION.
    ```
+
    The agent will ask a few clarifying questions and then create a GitHub Issue.
 
 2. **Implement the change** — Reference the issue number with the developer agent:
-   ```
+
+   ```text
    @terraform-developer Implement issue #42.
    ```
+
    The agent writes the Terraform code and opens a PR for you.
 
 3. **Review the PR** — Request an automated review:
-   ```
+
+   ```text
    @code-reviewer Please review PR #43.
    ```
 

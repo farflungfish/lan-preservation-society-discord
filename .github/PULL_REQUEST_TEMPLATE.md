@@ -17,7 +17,7 @@
 <details>
 <summary>Show plan</summary>
 
-```
+```text
 (paste here)
 ```
 
