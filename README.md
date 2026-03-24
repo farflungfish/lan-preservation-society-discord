@@ -42,6 +42,12 @@ terraform/
 
 ---
 
+## 🚀 First-Time Setup
+
+**New here?  Start with the [Setup Guide (SETUP.md)](SETUP.md).**  It walks you step-by-step through creating the Discord bot, giving it permissions, and wiring the token into Terraform and GitHub — no prior experience needed.
+
+---
+
 ## Contributing (Without Knowing Terraform)
 
 Use the GitHub Copilot agents to contribute without writing any Terraform:
