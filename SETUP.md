@@ -126,6 +126,18 @@ terraform login
 
 Follow the prompts — it will open a browser window where you approve the login.  This saves a token in `~/.terraform.d/credentials.tfrc.json` so you don't need to repeat this.
 
+Next, tell Terraform which organisation to use by setting the `TF_CLOUD_ORGANIZATION` environment variable to the organisation name you created in Step 5b:
+
+**macOS / Linux:**
+```bash
+export TF_CLOUD_ORGANIZATION="your-org-name-here"
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:TF_CLOUD_ORGANIZATION = "your-org-name-here"
+```
+
 Then initialise:
 
 ```bash
@@ -285,7 +297,7 @@ After importing, run `terraform plan` — it should show no changes for the impo
 | Bot is not in the server | Skipped Step 3 | Follow Step 3 to invite the bot |
 | `terraform: command not found` | Terraform not installed | Follow Step 4a |
 | Duplicate channels appear | Existing channels not imported | Follow the "Importing Existing Resources" section above |
-| `Error: No Terraform Cloud organization` | `TF_CLOUD_ORGANIZATION` not set | Add the variable in GitHub (Step 6) or run `terraform login` locally |
+| `Error: No Terraform Cloud organization` | `TF_CLOUD_ORGANIZATION` not set | Set the env var locally (`export TF_CLOUD_ORGANIZATION="your-org-name"` on macOS/Linux, or `$env:TF_CLOUD_ORGANIZATION = "your-org-name"` on Windows), then re-run `terraform init`. For CI, add the variable in GitHub (Step 6) |
 | `Error: Unauthorized` on `terraform init` | Wrong or missing TFC token | Re-run `terraform login` locally, or check `TF_API_TOKEN` secret in GitHub |
 | PR plan shows "Skipped (secrets not configured)" | Secrets/variable missing in GitHub | Add `DISCORD_TOKEN`, `TF_API_TOKEN`, and `TF_CLOUD_ORGANIZATION` (Step 6) |
 
