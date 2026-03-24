@@ -16,8 +16,7 @@ All server structure changes — channels, roles, categories, permissions — ar
     code-reviewer.md          # Reviews PRs for correctness
     repo-manager.md           # Housekeeping: labels, milestones, stale issues
   workflows/
-    pr-validation.yml         # Runs on every PR: fmt → validate → tflint → plan
-    terraform-apply.yml       # Runs on merge to main: terraform apply
+    pr-validation.yml         # Runs on every PR: fmt → validate → tflint
   CODEOWNERS                  # Required reviewers for every PR
   PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
   copilot-instructions.md     # Workspace instructions for GitHub Copilot
@@ -102,11 +101,10 @@ Every pull request targeting `main` automatically runs:
 | `terraform fmt -check` | Enforces canonical Terraform formatting |
 | `terraform validate` | Validates syntax and schema |
 | `tflint` | Best-practice linting |
-| `terraform plan` | Posts plan output as a PR comment |
 
 **All checks must pass and at least one reviewer must approve before a PR can be merged.**
 
-After merge to `main`, the **Terraform Apply** workflow applies the changes (requires a `production` environment approval if configured).
+This repository uses **HCP Terraform with VCS OAuth integration**. When a PR is opened, HCP Terraform automatically runs a speculative plan and posts the result as a GitHub check. When a PR is merged to `main`, HCP Terraform automatically runs the full plan and apply — no separate apply workflow is needed.
 
 ---
 
@@ -122,6 +120,8 @@ The `main` branch is protected:
 
 ## Secrets & Variables
 
+This repository uses HCP Terraform's VCS OAuth integration. Plan and apply runs are triggered automatically by HCP Terraform when PRs are opened or merged — no Terraform credentials are needed in GitHub Actions secrets.
+
 | Type | Name | Location | Description |
 |------|------|----------|-------------|
-| Secret | `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token |
+| Secret | `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token (used by HCP Terraform workspace variable) |
