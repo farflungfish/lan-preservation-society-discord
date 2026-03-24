@@ -1,0 +1,207 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform-fmt:
+    name: Terraform Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      - name: Terraform Format Check
+        working-directory: terraform
+        run: terraform fmt -check -recursive -diff
+
+  terraform-validate:
+    name: Terraform Validate
+    runs-on: ubuntu-latest
+    needs: terraform-fmt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      # -backend=false skips cloud/backend initialisation so validate works
+      # without a TF_CLOUD_ORGANIZATION or TF_API_TOKEN being configured.
+      - name: Terraform Init (providers only)
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: terraform
+        run: terraform validate
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    needs: terraform-fmt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: Init TFLint
+        working-directory: terraform
+        run: tflint --init
+
+      - name: Run TFLint
+        working-directory: terraform
+        run: tflint --format compact
+
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, tflint]
+    if: github.event_name == 'pull_request'
+    env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+      TF_VAR_discord_token: ${{ secrets.DISCORD_TOKEN }}
+      TF_VAR_server_id: "1486014276274753697"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+
+      # Determine whether all required secrets/variables are present.
+      # This lets the plan step degrade gracefully on PRs before secrets are configured,
+      # while still keeping the workflow green.
+      - name: Check plan prerequisites
+        id: prereqs
+        run: |
+          if [ -n "$TF_TOKEN_app_terraform_io" ] && \
+             [ -n "$TF_CLOUD_ORGANIZATION" ] && \
+             [ -n "$TF_VAR_discord_token" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Terraform plan skipped — configure TF_API_TOKEN secret, DISCORD_TOKEN secret, and TF_CLOUD_ORGANIZATION variable to enable plans on PRs."
+          fi
+
+      # Full init (connects to Terraform Cloud for remote state) when ready.
+      - name: Terraform Init
+        if: steps.prereqs.outputs.ready == 'true'
+        working-directory: terraform
+        run: terraform init
+
+      # Fallback init (providers only, no state) so the plan step can post a
+      # friendly "not configured" comment even before secrets are set up.
+      - name: Terraform Init (no backend)
+        if: steps.prereqs.outputs.ready != 'true'
+        working-directory: terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Plan
+        id: plan
+        working-directory: terraform
+        run: |
+          if [ "${{ steps.prereqs.outputs.ready }}" != "true" ]; then
+            echo "⚠️ **Plan skipped.**" > plan_output.txt
+            echo "" >> plan_output.txt
+            echo "To enable Terraform plans on pull requests, configure the following in your repository:" >> plan_output.txt
+            echo "- **Secret** \`DISCORD_TOKEN\` — your Discord bot token" >> plan_output.txt
+            echo "- **Secret** \`TF_API_TOKEN\` — your Terraform Cloud (HCP Terraform) API token" >> plan_output.txt
+            echo "- **Variable** \`TF_CLOUD_ORGANIZATION\` — your Terraform Cloud organisation name" >> plan_output.txt
+            echo "" >> plan_output.txt
+            echo "See [SETUP.md](SETUP.md) for step-by-step instructions." >> plan_output.txt
+            echo "exitcode=0" >> "$GITHUB_OUTPUT"
+          else
+            terraform plan -no-color 2>&1 | tee plan_output.txt
+            echo "exitcode=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          fi
+        continue-on-error: true
+
+      - name: Post Plan Comment
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const planOutput = fs.readFileSync('terraform/plan_output.txt', 'utf8');
+            const maxLen = 65000;
+            const truncated = planOutput.length > maxLen
+              ? planOutput.substring(0, maxLen) + '\n\n... (output truncated)'
+              : planOutput;
+
+            const exitCode = '${{ steps.plan.outputs.exitcode }}';
+            const ready = '${{ steps.prereqs.outputs.ready }}';
+            let status;
+            if (ready !== 'true') {
+              status = '⏭️ Skipped (secrets not configured)';
+            } else if (exitCode === '0') {
+              status = '✅ No changes';
+            } else if (exitCode === '2') {
+              status = '⚠️ Changes pending';
+            } else {
+              status = '❌ Failed';
+            }
+
+            const body = [
+              `## Terraform Plan — ${status}`,
+              '',
+              '<details>',
+              '<summary>Show output</summary>',
+              '',
+              '```',
+              truncated,
+              '```',
+              '',
+              '</details>',
+              '',
+              `*Pusher: @${{ github.actor }} · Workflow: \`${{ github.workflow }}\`*`,
+            ].join('\n');
+
+            // Replace any previous plan comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            for (const comment of comments) {
+              if (comment.body.startsWith('## Terraform Plan')) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: comment.id,
+                });
+              }
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Fail if plan errored
+        if: steps.prereqs.outputs.ready == 'true' && steps.plan.outputs.exitcode == '1'
+        run: exit 1

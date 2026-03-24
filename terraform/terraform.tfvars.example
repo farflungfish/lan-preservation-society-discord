@@ -1,0 +1,5 @@
+# Copy this file to terraform.tfvars and fill in real values.
+# NEVER commit terraform.tfvars — it is listed in .gitignore.
+
+# discord_token = "your-discord-bot-token-here"
+# server_id     = "1486014276274753697"
