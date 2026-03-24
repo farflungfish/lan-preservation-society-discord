@@ -73,25 +73,6 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full contribution guide.
 
 ---
 
-## Prerequisites (Local Development)
-
-| Tool        | Version  | Notes                                      |
-|-------------|----------|--------------------------------------------|
-| Terraform   | >= 1.9   | <https://developer.hashicorp.com/terraform/install> |
-| TFLint      | latest   | `brew install tflint` or see [releases](https://github.com/terraform-linters/tflint/releases) |
-
-### Local Setup
-
-```bash
-cd terraform
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars — add your Discord bot token
-terraform init
-terraform plan
-```
-
----
-
 ## PR Pipeline
 
 Every pull request targeting `main` automatically runs:
