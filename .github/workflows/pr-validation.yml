@@ -195,8 +195,6 @@ jobs:
               echo "- **Secret** \`DISCORD_TOKEN\` — your Discord bot token"
               echo "- **Secret** \`TF_API_TOKEN\` — your Terraform Cloud API token"
               echo "- **Variable** \`TF_CLOUD_ORGANIZATION\` — your Terraform Cloud organization name"
-              echo ""
-              echo "See [SETUP.md](../SETUP.md) for step-by-step instructions."
             } > plan_output.txt
             echo "exitcode=0" >> "$GITHUB_OUTPUT"
           else

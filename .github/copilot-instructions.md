@@ -26,7 +26,6 @@ terraform/
   outputs.tf                  # Exported IDs (channels, roles)
   terraform.tfvars.example    # Variable template — copy to terraform.tfvars locally
 CONTRIBUTORS.md               # Contributor guide
-SETUP.md                      # Step-by-step environment setup
 README.md                     # Project overview
 ```
 
