@@ -2,6 +2,8 @@
 
 Infrastructure-as-code for the **LAN Preservation Society** Discord server (ID: `1486014276274753697`), managed with [Terraform](https://www.terraform.io/) and the [`Lucky3028/discord`](https://registry.terraform.io/providers/Lucky3028/discord) provider.
 
+All server structure changes — channels, roles, categories, permissions — are made by editing Terraform files and opening a Pull Request. **Never apply changes directly**; always go through the PR pipeline so that `terraform plan` output is visible and reviewed before anything is applied.
+
 ---
 
 ## Repository Layout
@@ -16,15 +18,17 @@ Infrastructure-as-code for the **LAN Preservation Society** Discord server (ID: 
   workflows/
     pr-validation.yml         # Runs on every PR: fmt → validate → tflint → plan
     terraform-apply.yml       # Runs on merge to main: terraform apply
-  CODEOWNERS                  # Required reviewers
-  PULL_REQUEST_TEMPLATE.md    # Standardised PR template
-  copilot-instructions.md     # Context for GitHub Copilot
+  CODEOWNERS                  # Required reviewers for every PR
+  PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
+  copilot-instructions.md     # Workspace instructions for GitHub Copilot
 terraform/
   versions.tf                 # Provider & Terraform version pins
   variables.tf                # Input variables (token, server ID)
   main.tf                     # Roles, categories, channels
-  outputs.tf                  # Outputs (IDs for roles, channels, etc.)
+  outputs.tf                  # Exported resource IDs
   terraform.tfvars.example    # Template — copy to terraform.tfvars locally
+CONTRIBUTORS.md               # How to contribute and contributor list
+SETUP.md                      # Step-by-step first-time setup guide
 ```
 
 ---
@@ -48,13 +52,32 @@ terraform/
 
 ---
 
-## Contributing (Without Knowing Terraform)
+## Contributing
 
-Use the GitHub Copilot agents to contribute without writing any Terraform:
+You do **not** need to know Terraform to contribute.  This repository uses **GitHub Copilot** agents to guide contributors from idea to merged PR.
 
-1. **Describe your change** — Open a Copilot chat and say `@issue-consultant I'd like to add a #resources channel under PRESERVATION`.  The agent will create a GitHub Issue for you.
-2. **Implement the change** — Use `@terraform-developer` and reference the issue number.  It will write the Terraform code and open a PR.
-3. **Review the PR** — Use `@code-reviewer` to get an automated review of the PR.
+### Using GitHub Copilot to Contribute
+
+1. **Describe your change** — Open a Copilot chat and say:
+   ```
+   @issue-consultant I'd like to add a #resources channel under PRESERVATION.
+   ```
+   The agent will ask a few clarifying questions and then create a GitHub Issue.
+
+2. **Implement the change** — Reference the issue number with the developer agent:
+   ```
+   @terraform-developer Implement issue #42.
+   ```
+   The agent writes the Terraform code and opens a PR for you.
+
+3. **Review the PR** — Request an automated review:
+   ```
+   @code-reviewer Please review PR #43.
+   ```
+
+GitHub Copilot uses the instructions in `.github/copilot-instructions.md` to understand this repository's conventions, so its suggestions will already follow the project's standards.
+
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full contribution guide.
 
 ---
 
@@ -77,23 +100,39 @@ terraform plan
 
 ---
 
-## Secrets & Variables
-
-| Type     | Name                    | Where to set                                   | Description                          |
-|----------|-------------------------|------------------------------------------------|--------------------------------------|
-| Secret   | `DISCORD_TOKEN`         | GitHub → Settings → Secrets → Actions          | Discord bot token                    |
-| Secret   | `TF_API_TOKEN`          | GitHub → Settings → Secrets → Actions          | Terraform Cloud (HCP Terraform) token |
-| Variable | `TF_CLOUD_ORGANIZATION` | GitHub → Settings → Secrets → Actions → Variables | Your Terraform Cloud org name     |
-
----
-
 ## PR Pipeline
 
 Every pull request targeting `main` automatically runs:
 
-1. `terraform fmt -check` — format check
-2. `terraform validate` — syntax and schema validation
-3. `tflint` — best-practice linting
-4. `terraform plan` — plan output posted as a PR comment
+| Check | What it does |
+|-------|-------------|
+| `terraform fmt -check` | Enforces canonical Terraform formatting |
+| `terraform validate` | Validates syntax and schema |
+| `tflint` | Best-practice linting |
+| `terraform plan` | Posts plan output as a PR comment |
+
+**All checks must pass and at least one reviewer must approve before a PR can be merged.**
 
 After merge to `main`, the **Terraform Apply** workflow applies the changes (requires a `production` environment approval if configured).
+
+---
+
+## Branch Protection
+
+The `main` branch is protected:
+
+- Direct pushes are blocked — all changes must come via a Pull Request.
+- The PR pipeline (above) must pass before merging.
+- At least one approving review from a code owner is required.
+
+See [SETUP.md](SETUP.md) for instructions on configuring these rules in a fork.
+
+---
+
+## Secrets & Variables
+
+| Type | Name | Location | Description |
+|------|------|----------|-------------|
+| Secret | `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token |
+| Secret | `TF_API_TOKEN` | GitHub → Settings → Secrets → Actions | Terraform Cloud (HCP Terraform) token |
+| Variable | `TF_CLOUD_ORGANIZATION` | GitHub → Settings → Variables → Actions | Your Terraform Cloud org name |

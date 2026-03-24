@@ -4,5 +4,5 @@
 # Terraform infrastructure requires explicit sign-off
 /terraform/ @farflungfish
 
-# Pipeline changes require explicit sign-off
+# Pipeline and workflow changes require explicit sign-off
 /.github/workflows/ @farflungfish
