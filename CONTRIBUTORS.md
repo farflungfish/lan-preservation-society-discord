@@ -31,7 +31,7 @@ This repository has GitHub Copilot agents that guide you from idea to merged PR 
    @code-reviewer Review PR #13 for correctness and best practices.
    ```
 
-5. **Wait for CI to pass** and a maintainer to approve, then the change is merged and applied automatically.
+5. **Wait for CI to pass** and a maintainer to approve, then the change is merged. HCP Terraform automatically applies the change via its VCS integration.
 
 ### Option B — Manual Contribution
 
@@ -41,7 +41,7 @@ If you are comfortable with Terraform:
 2. Copy `terraform/terraform.tfvars.example` → `terraform/terraform.tfvars` and fill in your credentials.
 3. Make changes in `terraform/`.
 4. Run `terraform fmt -recursive` and `terraform validate` locally.
-5. Open a Pull Request.  The CI pipeline will run `fmt`, `validate`, `tflint`, and post a `plan` as a PR comment.
+5. Open a Pull Request.  The CI pipeline will run `fmt`, `validate`, and `tflint`. HCP Terraform will automatically run a speculative plan and post the result as a GitHub check.
 6. Address review feedback until the PR is approved and CI is green.
 
 ---
