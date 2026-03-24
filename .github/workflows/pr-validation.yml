@@ -87,6 +87,8 @@ jobs:
       - name: Terraform Validate
         if: steps.check-tf.outputs.has_terraform == 'true'
         working-directory: terraform
+        env:
+          DISCORD_TOKEN: "placeholder-for-validation"
         run: terraform validate
 
   tflint:
