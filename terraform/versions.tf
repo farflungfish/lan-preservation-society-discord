@@ -8,13 +8,15 @@ terraform {
     }
   }
 
-  # Uncomment and configure to use Terraform Cloud for remote state:
-  # cloud {
-  #   organization = "lan-preservation-society"
-  #   workspaces {
-  #     name = "discord"
-  #   }
-  # }
+  # Remote state is stored in Terraform Cloud (HCP Terraform) free tier.
+  # Set the TF_CLOUD_ORGANIZATION GitHub variable to your HCP Terraform org name.
+  # See SETUP.md for step-by-step instructions.
+  cloud {
+    # organization is read from the TF_CLOUD_ORGANIZATION environment variable
+    workspaces {
+      name = "lan-preservation-society-discord"
+    }
+  }
 }
 
 provider "discord" {

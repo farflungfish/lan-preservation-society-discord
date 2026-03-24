@@ -41,11 +41,11 @@ jobs:
         with:
           terraform_version: "~1.9"
 
-      - name: Terraform Init
+      # -backend=false skips cloud/backend initialisation so validate works
+      # without a TF_CLOUD_ORGANIZATION or TF_API_TOKEN being configured.
+      - name: Terraform Init (providers only)
         working-directory: terraform
         run: terraform init -backend=false
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Validate
         working-directory: terraform
@@ -78,6 +78,8 @@ jobs:
     needs: [terraform-validate, tflint]
     if: github.event_name == 'pull_request'
     env:
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
+      TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
       TF_VAR_discord_token: ${{ secrets.DISCORD_TOKEN }}
       TF_VAR_server_id: "1486014276274753697"
     steps:
@@ -89,18 +91,52 @@ jobs:
         with:
           terraform_version: "~1.9"
 
+      # Determine whether all required secrets/variables are present.
+      # This lets the plan step degrade gracefully on PRs before secrets are configured,
+      # while still keeping the workflow green.
+      - name: Check plan prerequisites
+        id: prereqs
+        run: |
+          if [ -n "$TF_TOKEN_app_terraform_io" ] && \
+             [ -n "$TF_CLOUD_ORGANIZATION" ] && \
+             [ -n "$TF_VAR_discord_token" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Terraform plan skipped — configure TF_API_TOKEN secret, DISCORD_TOKEN secret, and TF_CLOUD_ORGANIZATION variable to enable plans on PRs."
+          fi
+
+      # Full init (connects to Terraform Cloud for remote state) when ready.
       - name: Terraform Init
+        if: steps.prereqs.outputs.ready == 'true'
+        working-directory: terraform
+        run: terraform init
+
+      # Fallback init (providers only, no state) so the plan step can post a
+      # friendly "not configured" comment even before secrets are set up.
+      - name: Terraform Init (no backend)
+        if: steps.prereqs.outputs.ready != 'true'
         working-directory: terraform
         run: terraform init -backend=false
-        env:
-          TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Plan
         id: plan
         working-directory: terraform
         run: |
-          terraform plan -no-color -out=tfplan 2>&1 | tee plan_output.txt
-          echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+          if [ "${{ steps.prereqs.outputs.ready }}" != "true" ]; then
+            echo "⚠️ **Plan skipped.**" > plan_output.txt
+            echo "" >> plan_output.txt
+            echo "To enable Terraform plans on pull requests, configure the following in your repository:" >> plan_output.txt
+            echo "- **Secret** \`DISCORD_TOKEN\` — your Discord bot token" >> plan_output.txt
+            echo "- **Secret** \`TF_API_TOKEN\` — your Terraform Cloud (HCP Terraform) API token" >> plan_output.txt
+            echo "- **Variable** \`TF_CLOUD_ORGANIZATION\` — your Terraform Cloud organisation name" >> plan_output.txt
+            echo "" >> plan_output.txt
+            echo "See [SETUP.md](SETUP.md) for step-by-step instructions." >> plan_output.txt
+            echo "exitcode=0" >> "$GITHUB_OUTPUT"
+          else
+            terraform plan -no-color 2>&1 | tee plan_output.txt
+            echo "exitcode=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          fi
         continue-on-error: true
 
       - name: Post Plan Comment
@@ -116,29 +152,41 @@ jobs:
               : planOutput;
 
             const exitCode = '${{ steps.plan.outputs.exitcode }}';
-            const status = exitCode === '0' ? '✅ Success' : exitCode === '2' ? '⚠️ Changes Pending' : '❌ Failed';
+            const ready = '${{ steps.prereqs.outputs.ready }}';
+            let status;
+            if (ready !== 'true') {
+              status = '⏭️ Skipped (secrets not configured)';
+            } else if (exitCode === '0') {
+              status = '✅ No changes';
+            } else if (exitCode === '2') {
+              status = '⚠️ Changes pending';
+            } else {
+              status = '❌ Failed';
+            }
 
-            const body = `## Terraform Plan — ${status}
+            const body = [
+              `## Terraform Plan — ${status}`,
+              '',
+              '<details>',
+              '<summary>Show output</summary>',
+              '',
+              '```',
+              truncated,
+              '```',
+              '',
+              '</details>',
+              '',
+              `*Pusher: @${{ github.actor }} · Workflow: \`${{ github.workflow }}\`*`,
+            ].join('\n');
 
-            <details>
-            <summary>Show Plan</summary>
-
-            \`\`\`terraform
-            ${truncated}
-            \`\`\`
-
-            </details>
-
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Workflow: \`${{ github.workflow }}\`*`;
-
-            // Delete previous plan comments
-            const comments = await github.rest.issues.listComments({
+            // Replace any previous plan comment
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            for (const comment of comments.data) {
-              if (comment.body.includes('## Terraform Plan')) {
+            for (const comment of comments) {
+              if (comment.body.startsWith('## Terraform Plan')) {
                 await github.rest.issues.deleteComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -155,5 +203,5 @@ jobs:
             });
 
       - name: Fail if plan errored
-        if: steps.plan.outputs.exitcode == '1'
+        if: steps.prereqs.outputs.ready == 'true' && steps.plan.outputs.exitcode == '1'
         run: exit 1

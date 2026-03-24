@@ -77,12 +77,13 @@ terraform plan
 
 ---
 
-## Secrets
+## Secrets & Variables
 
-| Secret Name     | Where to set                         | Description                  |
-|-----------------|--------------------------------------|------------------------------|
-| `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token            |
-| `TF_API_TOKEN`  | GitHub → Settings → Secrets → Actions | Terraform Cloud token (optional) |
+| Type     | Name                    | Where to set                                   | Description                          |
+|----------|-------------------------|------------------------------------------------|--------------------------------------|
+| Secret   | `DISCORD_TOKEN`         | GitHub → Settings → Secrets → Actions          | Discord bot token                    |
+| Secret   | `TF_API_TOKEN`          | GitHub → Settings → Secrets → Actions          | Terraform Cloud (HCP Terraform) token |
+| Variable | `TF_CLOUD_ORGANIZATION` | GitHub → Settings → Secrets → Actions → Variables | Your Terraform Cloud org name     |
 
 ---
 

@@ -8,13 +8,18 @@ This guide walks you through everything you need to do **once** before Terraform
 
 Terraform talks to Discord through a **bot**.  Think of the bot as a robot admin account that Terraform logs in as to make changes (create channels, roles, etc.).
 
+Terraform also needs somewhere to remember what it has already created — this is called **state**.  We store state in **Terraform Cloud (HCP Terraform)**, which is **free** and works natively with GitHub Actions.
+
 You need to:
 1. Create the bot in the Discord Developer Portal
 2. Give the bot admin rights on your server
 3. Copy the bot's secret token
-4. Tell Terraform (and GitHub) about the token
+4. Set up a free Terraform Cloud account (for state storage)
+5. Tell GitHub about your tokens so the CI pipeline can run
 
-The whole process takes about 10 minutes.
+The whole process takes about 20 minutes.
+
+> ℹ️ **Does GitHub store Terraform state?**  No — GitHub has no native Terraform state backend.  The closest free option that integrates tightly with GitHub is [Terraform Cloud (HCP Terraform)](https://app.terraform.io), which this repo is already configured to use.
 
 ---
 
@@ -111,7 +116,17 @@ server_id     = "1486014276274753697"
 
 ### 4c — Initialise Terraform
 
-This downloads the Discord provider plugin (like installing an npm package):
+This downloads the Discord provider plugin and connects to Terraform Cloud for state storage.
+
+You need to log in to Terraform Cloud first:
+
+```bash
+terraform login
+```
+
+Follow the prompts — it will open a browser window where you approve the login.  This saves a token in `~/.terraform.d/credentials.tfrc.json` so you don't need to repeat this.
+
+Then initialise:
 
 ```bash
 cd terraform
@@ -120,8 +135,10 @@ terraform init
 
 You should see:
 ```
-Terraform has been successfully initialized!
+Terraform Cloud has been successfully initialized!
 ```
+
+> If you haven't set up Terraform Cloud yet (Step 5), run `terraform init -backend=false` instead.  This skips state storage and still lets you validate the configuration locally.
 
 ### 4d — Preview the Changes
 
@@ -152,24 +169,80 @@ Terraform will now create all the channels, categories, and roles in your Discor
 
 ---
 
-## Step 5 — Add the Token to GitHub (for the CI Pipeline)
+## Step 5 — Set Up Terraform Cloud (Free State Storage)
 
-This lets GitHub Actions run `terraform plan` automatically on every Pull Request.
+Terraform needs to remember what resources it has already created in your Discord server.  This memory is called **state**.  We store it in **Terraform Cloud (HCP Terraform)**, which is free for up to 500 resources.
 
-1. Go to your repository on GitHub: `https://github.com/farflungfish/lan-preservation-society-discord`
-2. Click **Settings** (the tab at the top of the repo page).
-3. In the left sidebar, click **Secrets and variables** → **Actions**.
-4. Click **"New repository secret"**.
-5. Fill in:
-   - **Name**: `DISCORD_TOKEN`
-   - **Secret**: paste your bot token
-6. Click **"Add secret"**.
+> **Why not store state in GitHub?**  GitHub has no native Terraform state backend — it can't safely track locks to prevent two people applying at the same time.  Terraform Cloud solves this and is purpose-built for the job.
 
-That's it.  The CI workflow (`pr-validation.yml`) will now be able to run `terraform plan` on every PR and post the output as a comment.
+### 5a — Create a Free Account
+
+1. Go to **<https://app.terraform.io>** and click **"Sign up"**.
+2. Enter your email, username, and a strong password, then click **"Create account"**.
+3. Verify your email when prompted.
+
+### 5b — Create an Organisation
+
+An *organisation* is like a workspace folder.  You only need one.
+
+1. After signing in, you will be prompted to **"Create your organization"**.
+2. Enter an organisation name — e.g. `lan-preservation-society` (must be globally unique on the platform).
+3. Click **"Create organization"**.
+
+> 📝 Note this organisation name — you'll need it in Step 6.
+
+### 5c — Create a Workspace
+
+1. In your organisation, click **"New workspace"**.
+2. Choose **"CLI-driven workflow"** (not the GitHub-connected option — we drive it from GitHub Actions ourselves).
+3. Name the workspace exactly: `lan-preservation-society-discord`
+4. Click **"Create workspace"**.
+
+### 5d — Generate a Terraform Cloud API Token
+
+This is how GitHub Actions authenticates to Terraform Cloud.
+
+1. In the top-right corner of Terraform Cloud, click your **avatar** → **"Account Settings"**.
+2. In the left sidebar, click **"Tokens"**.
+3. Click **"Create an API token"**.
+4. Give it a description like `GitHub Actions` and click **"Create API token"**.
+5. Copy the token immediately — it is only shown once.
+
+> ⚠️ **This token is a password.  Keep it safe.**  Anyone with it can manage your Terraform state.
 
 ---
 
-## Step 6 — (Optional) Set Up a `production` Environment for Apply Protection
+## Step 6 — Add Tokens to GitHub
+
+This wires everything together so the CI pipeline can run `terraform plan` and `terraform apply`.
+
+1. Go to your repository: `https://github.com/farflungfish/lan-preservation-society-discord`
+2. Click **Settings** (the tab at the top of the repo page).
+
+### Add Secrets (sensitive values)
+
+3. In the left sidebar, click **Secrets and variables** → **Actions**.
+4. Click **"New repository secret"** and add each of the following:
+
+| Secret name     | Value                                         |
+|-----------------|-----------------------------------------------|
+| `DISCORD_TOKEN` | Your Discord bot token (from Step 2)          |
+| `TF_API_TOKEN`  | Your Terraform Cloud API token (from Step 5d) |
+
+### Add a Variable (non-sensitive value)
+
+5. Still on the **Secrets and variables → Actions** page, click the **"Variables"** tab.
+6. Click **"New repository variable"** and add:
+
+| Variable name           | Value                                              |
+|-------------------------|----------------------------------------------------|
+| `TF_CLOUD_ORGANIZATION` | Your Terraform Cloud org name (from Step 5b)       |
+
+Once all three are saved, every new PR will automatically run `terraform plan` and post the output as a comment.
+
+---
+
+## Step 7 — (Optional) Set Up a `production` Environment for Apply Protection
 
 By default, `terraform apply` runs automatically when code is merged to `main`.  If you want a manual approval gate before apply runs:
 
@@ -208,10 +281,13 @@ After importing, run `terraform plan` — it should show no changes for the impo
 | Problem | Likely cause | Fix |
 |---------|-------------|-----|
 | `Error: 403 Forbidden` | Bot doesn't have permission | Make sure the bot has Administrator permission in Server Settings → Roles |
-| `Error: 401 Unauthorized` | Wrong token | Double-check the token in `terraform.tfvars` — reset it in the Developer Portal if unsure |
+| `Error: 401 Unauthorized` | Wrong Discord token | Double-check the token in `terraform.tfvars` — reset it in the Developer Portal if unsure |
 | Bot is not in the server | Skipped Step 3 | Follow Step 3 to invite the bot |
 | `terraform: command not found` | Terraform not installed | Follow Step 4a |
 | Duplicate channels appear | Existing channels not imported | Follow the "Importing Existing Resources" section above |
+| `Error: No Terraform Cloud organization` | `TF_CLOUD_ORGANIZATION` not set | Add the variable in GitHub (Step 6) or run `terraform login` locally |
+| `Error: Unauthorized` on `terraform init` | Wrong or missing TFC token | Re-run `terraform login` locally, or check `TF_API_TOKEN` secret in GitHub |
+| PR plan shows "Skipped (secrets not configured)" | Secrets/variable missing in GitHub | Add `DISCORD_TOKEN`, `TF_API_TOKEN`, and `TF_CLOUD_ORGANIZATION` (Step 6) |
 
 ---
 
@@ -219,5 +295,6 @@ After importing, run `terraform plan` — it should show no changes for the impo
 
 - Discord Developer Portal: <https://discord.com/developers/applications>
 - Terraform Install: <https://developer.hashicorp.com/terraform/install>
+- Terraform Cloud (HCP Terraform): <https://app.terraform.io>
 - Lucky3028 Discord Provider docs: <https://registry.terraform.io/providers/Lucky3028/discord/latest/docs>
 - Your repo: <https://github.com/farflungfish/lan-preservation-society-discord>
