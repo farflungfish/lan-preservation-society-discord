@@ -28,7 +28,6 @@ terraform/
   outputs.tf                  # Exported resource IDs
   terraform.tfvars.example    # Template — copy to terraform.tfvars locally
 CONTRIBUTORS.md               # How to contribute and contributor list
-SETUP.md                      # Step-by-step first-time setup guide
 ```
 
 ---
@@ -43,12 +42,6 @@ SETUP.md                      # Step-by-step first-time setup guide
 | PRESERVATION    | #preservation-talk, #hardware-help, #software-help, 🔊 Preservation Lab |
 
 **Roles**: Admin · Moderator · Bot · Member
-
----
-
-## 🚀 First-Time Setup
-
-**New here?  Start with the [Setup Guide (SETUP.md)](SETUP.md).**  It walks you step-by-step through creating the Discord bot, giving it permissions, and wiring the token into Terraform and GitHub — no prior experience needed.
 
 ---
 
@@ -125,8 +118,6 @@ The `main` branch is protected:
 - The PR pipeline (above) must pass before merging.
 - At least one approving review from a code owner is required.
 
-See [SETUP.md](SETUP.md) for instructions on configuring these rules in a fork.
-
 ---
 
 ## Secrets & Variables
@@ -134,5 +125,3 @@ See [SETUP.md](SETUP.md) for instructions on configuring these rules in a fork.
 | Type | Name | Location | Description |
 |------|------|----------|-------------|
 | Secret | `DISCORD_TOKEN` | GitHub → Settings → Secrets → Actions | Discord bot token |
-| Secret | `TF_API_TOKEN` | GitHub → Settings → Secrets → Actions | Terraform Cloud (HCP Terraform) token |
-| Variable | `TF_CLOUD_ORGANIZATION` | GitHub → Settings → Variables → Actions | Your Terraform Cloud org name |
