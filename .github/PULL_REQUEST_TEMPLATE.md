@@ -1,36 +1,35 @@
 ## Description
 
-<!-- What does this PR change and why? -->
+<!-- What does this PR do? Link the related issue if applicable (e.g. Closes #123) -->
 
 ## Type of Change
 
-- [ ] New Discord channel / category
-- [ ] Role change
-- [ ] Permission update
+- [ ] New Discord resource (channel, role, category, etc.)
+- [ ] Modification to existing Discord resource
 - [ ] Pipeline / workflow change
 - [ ] Documentation update
-- [ ] Other (describe):
-
-## Checklist
-
-- [ ] `terraform fmt -recursive` has been run
-- [ ] `terraform validate` passes locally (or CI is green)
-- [ ] The Terraform plan in the CI comment looks correct
-- [ ] No secrets or sensitive values are committed
-- [ ] `CONTRIBUTORS.md` is updated if this is a first contribution
+- [ ] Other (describe below)
 
 ## Terraform Plan Output
 
-<!-- Paste the key section of the plan here, or leave blank and point to the CI comment -->
+<!-- Paste the relevant section of `terraform plan` output, or note if no infra changes -->
 
 <details>
-<summary>Plan summary</summary>
+<summary>Show plan</summary>
 
 ```
 (paste here)
 ```
 
 </details>
+
+## Checklist
+
+- [ ] `terraform fmt -recursive` has been run and code is properly formatted
+- [ ] `terraform validate` passes locally (or CI is green)
+- [ ] The Terraform plan in the CI comment looks correct
+- [ ] Sensitive values (tokens, IDs) are referenced via variables / secrets and not hardcoded
+- [ ] `CONTRIBUTORS.md` is updated if this is a first contribution
 
 ## Related Issues
 

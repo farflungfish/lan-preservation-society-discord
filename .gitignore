@@ -1,11 +1,25 @@
-# Terraform variables — sensitive values, never committed
-terraform.tfvars
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
 
-# Terraform local state and cache
-.terraform/
-terraform.tfstate
-terraform.tfstate.backup
-*.tfplan
-
-# macOS
+# OS
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
