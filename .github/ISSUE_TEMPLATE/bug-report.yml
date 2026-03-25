@@ -1,0 +1,58 @@
+name: Bug Report
+description: Report a problem with the Discord server configuration or a workflow in this repository.
+labels:
+  - from-github
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+        Please provide as much detail as possible so we can reproduce and fix the issue.
+
+  - type: input
+    id: summary
+    attributes:
+      label: What went wrong?
+      description: A brief description of the problem.
+      placeholder: The #rules channel lets members post messages when it should be read-only.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should happen?
+      placeholder: Members should only be able to read messages in #rules, not post.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What actually happens?
+      placeholder: Members can post messages in #rules.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can a maintainer reproduce the issue?
+      placeholder: |
+        1. Join the Discord server.
+        2. Navigate to #rules.
+        3. Try to type a message.
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other information that might be helpful (screenshots, error messages, etc.).
+    validations:
+      required: false

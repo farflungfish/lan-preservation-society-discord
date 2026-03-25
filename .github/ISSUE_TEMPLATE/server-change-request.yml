@@ -1,0 +1,56 @@
+name: Server Change Request
+description: Request a change to the Discord server structure (channels, roles, categories, permissions).
+labels:
+  - from-github
+  - server-change
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a change to the LAN Preservation Society Discord server!
+        Fill in as much detail as you can — the more context you give, the easier it is for a maintainer or Copilot agent to implement your request.
+
+  - type: input
+    id: summary
+    attributes:
+      label: What would you like to change?
+      description: A one-line summary of the change (e.g. "Add a #movie-nights voice channel under GENERAL").
+      placeholder: Add a #movie-nights voice channel under GENERAL
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why is this change needed?
+      description: Explain the problem this solves or the value it adds to the community.
+      placeholder: |
+        The community often organises movie watching sessions but there is nowhere dedicated to coordinate them.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: change_type
+    attributes:
+      label: Type of change
+      options:
+        - New channel
+        - New category
+        - New role
+        - Modify existing channel/category/role
+        - Change permissions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Additional details
+      description: Anything else that would help — desired position, permissions, topic text, etc.
+      placeholder: |
+        - Channel name: movie-nights
+        - Category: GENERAL
+        - Topic: Coordinate community movie watching sessions
+    validations:
+      required: false
