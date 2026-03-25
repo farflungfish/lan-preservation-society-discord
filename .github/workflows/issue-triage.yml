@@ -1,0 +1,153 @@
+name: Daily Issue Triage
+
+on:
+  schedule:
+    # Runs every day at 09:00 UTC.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    name: Triage Open Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Triage untriaged issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // ----------------------------------------------------------------
+            // Helper: ensure a label exists (create if missing).
+            // ----------------------------------------------------------------
+            const ensureLabel = async (name, color, description) => {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (e) {
+                if (e.status === 404) {
+                  try {
+                    await github.rest.issues.createLabel({ owner, repo, name, color, description });
+                  } catch (ce) {
+                    // 422 = concurrent creation; treat as success.
+                    if (ce.status !== 422) throw ce;
+                  }
+                } else {
+                  throw e;
+                }
+              }
+            };
+
+            await ensureLabel('triaged', 'ededed', 'Issue has been reviewed and triaged');
+            await ensureLabel('terraform', 'd93f0b', 'Relates to Terraform infrastructure changes');
+            await ensureLabel('discord-structure', '0052cc', 'Relates to Discord server structure');
+
+            // ----------------------------------------------------------------
+            // Fetch all open issues (excluding PRs) that are not yet triaged.
+            // ----------------------------------------------------------------
+            const allIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+
+            const untriaged = allIssues.filter(
+              (issue) =>
+                !issue.pull_request &&
+                !issue.labels.some((l) => l.name === 'triaged'),
+            );
+
+            if (untriaged.length === 0) {
+              core.info('No untriaged issues found — nothing to do.');
+              return;
+            }
+
+            core.info(`Found ${untriaged.length} untriaged issue(s).`);
+
+            // ----------------------------------------------------------------
+            // Keyword patterns used to route issues to the right agent.
+            // Rules are evaluated in priority order (highest first).
+            // All matching labels are applied; the highest-priority match
+            // determines the suggested agent.
+            // ----------------------------------------------------------------
+            const routingRules = [
+              {
+                // Explicit Terraform infrastructure keywords only.
+                pattern: /terraform|\.tf\b/i,
+                label: 'terraform',
+                agent: 'terraform-developer',
+                reason: 'Terraform infrastructure changes',
+              },
+              {
+                // Discord server structure and community questions.
+                // Intentionally separate from Terraform keywords so that
+                // a plain "add a channel" request routes to the community
+                // agent for clarification before any code is written.
+                pattern: /channel|role|category|permission|voice|webhook|bot|discord|server.?structure/i,
+                label: 'discord-structure',
+                agent: 'discord-community-agent',
+                reason: 'Discord server structure and community questions',
+              },
+            ];
+
+            for (const issue of untriaged) {
+              const text = `${issue.title} ${issue.body || ''}`;
+              const existingLabels = issue.labels.map((l) => l.name);
+              const labelsToAdd = ['triaged'];
+
+              let agent = 'repo-manager';
+              let reason = 'general triage, housekeeping, and repository management';
+              let agentAssigned = false;
+
+              // Apply all matching rules (collect labels); first match sets the agent.
+              for (const rule of routingRules) {
+                if (rule.pattern.test(text)) {
+                  if (!existingLabels.includes(rule.label)) {
+                    labelsToAdd.push(rule.label);
+                  }
+                  if (!agentAssigned) {
+                    agent = rule.agent;
+                    reason = rule.reason;
+                    agentAssigned = true;
+                  }
+                }
+              }
+
+              // Add labels.
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: issue.number,
+                labels: labelsToAdd,
+              });
+
+              // Determine the source for the triage comment.
+              const source = existingLabels.includes('from-discord') ? 'Discord' : 'GitHub';
+
+              // Post a triage comment.
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: issue.number,
+                body: [
+                  `<!-- triage-bot -->`,
+                  `🤖 **Automated Triage**`,
+                  ``,
+                  `This issue (raised via **${source}**) has been automatically triaged.`,
+                  ``,
+                  `**Suggested agent:** \`${agent}\` — specialised in ${reason}.`,
+                  ``,
+                  `To engage the suggested agent, open Copilot Chat and type:`,
+                  `\`\`\``,
+                  `@${agent} Please review issue #${issue.number}.`,
+                  `\`\`\``,
+                ].join('\n'),
+              });
+
+              core.info(`Triaged issue #${issue.number} — suggested agent: ${agent}`);
+            }

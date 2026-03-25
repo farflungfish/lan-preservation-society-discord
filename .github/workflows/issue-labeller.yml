@@ -1,0 +1,62 @@
+name: Issue Labeller
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  label-source:
+    name: Label Issue Source
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply from-github label
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labels = context.payload.issue.labels.map((l) => l.name);
+
+            // Issues created by the Discord bridge already carry 'from-discord';
+            // only add 'from-github' to issues raised directly on GitHub.
+            if (labels.includes('from-discord')) {
+              core.info('Issue already labelled from-discord — skipping.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const labelName = 'from-github';
+
+            // Ensure the label exists before applying it.
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: labelName });
+            } catch (error) {
+              if (error.status === 404) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: labelName,
+                    color: '0075ca',
+                    description: 'Issue raised directly on GitHub',
+                  });
+                } catch (createError) {
+                  // 422 = label already exists (concurrent run); treat as success.
+                  if (createError.status !== 422) throw createError;
+                }
+              } else {
+                throw error;
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number: context.issue.number,
+              labels: [labelName],
+            });
+
+            core.info(`Applied '${labelName}' to issue #${context.issue.number}.`);
