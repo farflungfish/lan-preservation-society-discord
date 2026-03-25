@@ -90,7 +90,7 @@ When an issue is opened, assign agents based on the issue label:
 | Label | Assigned Agent | Rationale |
 | ----- | -------------- | --------- |
 | `bug` | `@code-reviewer` | Investigates the reported problem; if it requires a Terraform change, hands off to `@terraform-developer` |
-| `feature` | `@discord-community-agent` → `@terraform-developer` | Community agent clarifies requirements; developer implements |
+| `enhancement` | `@discord-community-agent` → `@terraform-developer` | Community agent clarifies requirements; developer implements |
 | `question` | `@discord-community-agent` | Answers server-structure questions; escalates to developer if config change is needed |
 | `from-discord` | `@issue-consultant` | Formats and categorises the Discord-originated request before routing to the appropriate agent |
 | `triage` | `@repo-manager` | Reviews the daily triage summary and takes housekeeping actions |
@@ -99,7 +99,7 @@ When an issue is opened, assign agents based on the issue label:
 
 - Issues labelled `bug` always get a `@code-reviewer` pass first — confirm before implementing a fix.
 - Issues with no label are flagged in the daily triage and should be labelled before assigning an agent.
-- Issues labelled `from-discord` need to be categorised (bug / feature / question) before an agent can act on them; `@issue-consultant` should do this.
+- Issues labelled `from-discord` need to be categorised (bug / enhancement / question) before an agent can act on them; `@issue-consultant` should do this.
 - Any issue that results in a Terraform change must go through `@terraform-developer` to produce a PR.
 
 ---

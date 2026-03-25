@@ -116,7 +116,7 @@ resource "discord_message" "public_launch_announcement" {
 
     🔒 **Security Audit** — A full pre-launch security review has been completed and documented in `SECURITY.md`. No credentials or sensitive data were found in the repository.
 
-    🤖 **Agent Routing** — GitHub Copilot agents are now assigned automatically based on issue labels, so bug reports, feature ideas, and community requests each get the right reviewer without manual triage.
+    🤖 **Agent Routing** — GitHub Copilot agent suggestions are now documented based on issue labels, so bug reports, feature ideas, and community requests can be routed to the right reviewer with minimal manual triage.
 
     See the full details in PR #25, or browse the updated README and SECURITY.md.
   EOT

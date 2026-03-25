@@ -23,12 +23,14 @@ jobs:
             const now   = Date.now();
             const oneDayMs = 24 * 60 * 60 * 1000;
 
-            // Fetch all open issues (not pull requests)
+            // Fetch all open issues (not pull requests, not the triage summary itself)
             const allIssues = await github.paginate(
               github.rest.issues.listForRepo,
               { owner, repo, state: 'open', per_page: 100 }
             );
-            const issues = allIssues.filter(i => !i.pull_request);
+            const issues = allIssues.filter(
+              i => !i.pull_request && !i.labels.some(l => l.name === 'triage')
+            );
 
             const stale       = [];
             const noLabel     = [];
@@ -65,10 +67,27 @@ jobs:
               fmt(noAssignee),
             ].join('\n');
 
+            // Ensure required labels exist
+            const requiredLabels = [
+              { name: 'triage',   color: 'e4e669', description: 'Daily triage summary' },
+              { name: 'question', color: 'cc317c', description: 'General question about the server' },
+            ];
+            for (const label of requiredLabels) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label.name });
+              } catch (err) {
+                if (err.status === 404) {
+                  await github.rest.issues.createLabel({ owner, repo, ...label });
+                } else {
+                  throw err;
+                }
+              }
+            }
+
             // Find an existing open triage issue to update, or create a new one
             const triageTitle = 'Daily Triage Summary';
-            const existing = issues.find(
-              i => i.title === triageTitle && i.labels.some(l => l.name === 'triage')
+            const existing = allIssues.find(
+              i => !i.pull_request && i.title === triageTitle && i.labels.some(l => l.name === 'triage')
             );
 
             if (existing) {
@@ -79,22 +98,6 @@ jobs:
               });
               core.info(`Updated triage issue #${existing.number}`);
             } else {
-              // Ensure the triage label exists
-              try {
-                await github.rest.issues.getLabel({ owner, repo, name: 'triage' });
-              } catch (err) {
-                if (err.status === 404) {
-                  await github.rest.issues.createLabel({
-                    owner, repo,
-                    name: 'triage',
-                    color: 'e4e669',
-                    description: 'Daily triage summary'
-                  });
-                } else {
-                  throw err;
-                }
-              }
-
               const created = await github.rest.issues.create({
                 owner, repo,
                 title: triageTitle,
