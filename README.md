@@ -82,6 +82,8 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full contribution guide.
 
 The Discord bot can hand off requests directly into this repository by triggering a `repository_dispatch` event. A GitHub Actions workflow (`Discord Issue Bridge`) will convert the payload into a new issue.
 
+Use the `#bug-reports` channel in Discord to collect requests. Point your bot to mirror each message there into a GitHub `repository_dispatch` call using the payload below so the workflow files an issue automatically.
+
 1. **Create a GitHub token for the bot** — A fine-grained PAT with repository access to this repo is sufficient (Repository permissions: Contents **Read & Write**, Metadata **Read**). Store it safely on the bot side; it is **not** needed in this repository.
 2. **POST a dispatch event from Discord** whenever a request is captured:
 

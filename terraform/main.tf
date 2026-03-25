@@ -103,6 +103,14 @@ resource "discord_text_channel" "off_topic" {
   category  = discord_category_channel.general.id
 }
 
+resource "discord_text_channel" "bug_reports" {
+  server_id = var.server_id
+  name      = "bug-reports"
+  topic     = "Report server issues and requests. Messages are mirrored to GitHub issues."
+  position  = 3
+  category  = discord_category_channel.general.id
+}
+
 # ---------------------------------------------------------------------------
 # CATEGORY: GAMING
 # ---------------------------------------------------------------------------

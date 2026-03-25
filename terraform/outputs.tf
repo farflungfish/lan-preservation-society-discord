@@ -55,3 +55,8 @@ output "channel_general_chat_id" {
   description = "ID of the #general-chat channel."
   value       = discord_text_channel.general_chat.id
 }
+
+output "channel_bug_reports_id" {
+  description = "ID of the #bug-reports channel."
+  value       = discord_text_channel.bug_reports.id
+}
