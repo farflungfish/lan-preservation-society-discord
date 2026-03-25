@@ -63,30 +63,32 @@ jobs:
                 .filter(Boolean);
             };
 
-            const labels = toArray(payload.labels);
+            const rawLabels = toArray(payload.labels);
             const defaultLabel = 'from-discord';
+            const allowedLabels = [defaultLabel];
+
+            let labels = rawLabels.filter((name) => allowedLabels.includes(name));
             if (!labels.length) {
-              labels.push(defaultLabel);
+              labels = [defaultLabel];
             }
 
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            for (const name of labels) {
-              try {
-                await github.rest.issues.getLabel({ owner, repo, name });
-              } catch (error) {
-                if (error.status === 404) {
-                  await github.rest.issues.createLabel({
-                    owner,
-                    repo,
-                    name,
-                    color: '5e5ef7',
-                    description: 'Requests created from Discord'
-                  });
-                } else {
-                  throw error;
-                }
+            // Ensure the default Discord label exists; do not auto-create arbitrary labels
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: defaultLabel });
+            } catch (error) {
+              if (error.status === 404) {
+                await github.rest.issues.createLabel({
+                  owner,
+                  repo,
+                  name: defaultLabel,
+                  color: '5e5ef7',
+                  description: 'Requests created from Discord'
+                });
+              } else {
+                throw error;
               }
             }
 
