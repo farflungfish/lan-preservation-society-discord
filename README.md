@@ -95,11 +95,11 @@ Use the `#bug-reports` channel in Discord to collect requests. Point your bot to
      -d '{
        "event_type": "discord_issue",
        "client_payload": {
-         "title": "Request: new #bug-reports channel",
-         "body": "From @SomeUser in #suggestions:\n\nAdd a dedicated place to report issues.",
+         "title": "Bug: game list not loading",
+         "body": "From @SomeUser in #bug-reports:\n\nThe game list page fails to load and shows an error.",
          "labels": ["from-discord", "community-request"],
          "discord_user": "SomeUser#1234",
-         "discord_channel": "#suggestions",
+         "discord_channel": "#bug-reports",
          "discord_message_url": "https://discord.com/channels/.../..."
        }
      }'
