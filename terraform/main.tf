@@ -64,6 +64,36 @@ resource "discord_text_channel" "rules" {
   sync_perms_with_category = true
 }
 
+resource "discord_message" "rules_onboarding" {
+  channel_id = discord_text_channel.rules.id
+  content    = <<-EOT
+    Welcome to the LAN Preservation Society!
+
+    Please read the rules and tap the **Accept Rules** prompt that Discord shows when you join. Once you accept, the rest of the server unlocks automatically—no need to wait for a moderator.
+
+    React with ✅ after you have read and accepted the rules.
+  EOT
+  pinned     = true
+}
+
+data "discord_permission" "rules_allow_readonly" {
+  view_channel         = "allow"
+  read_message_history = "allow"
+  add_reactions        = "allow"
+}
+
+data "discord_permission" "rules_deny_posting" {
+  send_messages = "deny"
+}
+
+resource "discord_channel_permission" "rules_everyone_readonly" {
+  channel_id   = discord_text_channel.rules.id
+  overwrite_id = var.server_id
+  type         = "role"
+  allow        = data.discord_permission.rules_allow_readonly.allow_bits
+  deny         = data.discord_permission.rules_deny_posting.deny_bits
+}
+
 resource "discord_text_channel" "announcements" {
   server_id                = var.server_id
   name                     = "announcements"
@@ -203,47 +233,4 @@ resource "discord_voice_channel" "preservation_voice" {
   position                 = 3
   category                 = discord_category_channel.preservation.id
   sync_perms_with_category = true
-}
-
-# ---------------------------------------------------------------------------
-# Permissions: gated access
-# ---------------------------------------------------------------------------
-locals {
-  view_channel_permission = 1024
-
-  gated_categories = {
-    general      = discord_category_channel.general.id
-    gaming       = discord_category_channel.gaming.id
-    preservation = discord_category_channel.preservation.id
-  }
-
-  gated_roles = {
-    bot       = discord_role.bot.id
-    member    = discord_role.member.id
-    moderator = discord_role.moderator.id
-  }
-}
-
-resource "discord_channel_permission" "gated_everyone" {
-  for_each = local.gated_categories
-
-  channel_id   = each.value
-  overwrite_id = var.server_id
-  type         = "role"
-  deny         = local.view_channel_permission
-}
-
-resource "discord_channel_permission" "gated_access" {
-  for_each = {
-    for pair in setproduct(keys(local.gated_categories), keys(local.gated_roles)) :
-    "${pair[0]}_${pair[1]}" => {
-      category_id = local.gated_categories[pair[0]]
-      role_id     = local.gated_roles[pair[1]]
-    }
-  }
-
-  channel_id   = each.value.category_id
-  overwrite_id = each.value.role_id
-  type         = "role"
-  allow        = local.view_channel_permission
 }

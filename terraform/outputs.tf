@@ -46,6 +46,11 @@ output "category_preservation_id" {
 }
 
 # Key channel IDs
+output "channel_rules_id" {
+  description = "ID of the #rules channel."
+  value       = discord_text_channel.rules.id
+}
+
 output "channel_announcements_id" {
   description = "ID of the #announcements channel."
   value       = discord_text_channel.announcements.id
