@@ -15,8 +15,11 @@ All server structure changes — channels, roles, categories, permissions — ar
     terraform-developer.md    # Writes Terraform code and opens PRs
     code-reviewer.md          # Reviews PRs for correctness
     repo-manager.md           # Housekeeping: labels, milestones, stale issues
+  ISSUE_TEMPLATE/             # Issue templates (bug report, feature request, question)
   workflows/
     pr-validation.yml         # Runs on every PR: fmt → validate → tflint
+    daily-triage.yml          # Runs daily: flags stale/unlabelled issues
+    discord-issue-bridge.yml  # Creates GitHub issues from Discord dispatches
   CODEOWNERS                  # Required reviewers for every PR
   PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
   copilot-instructions.md     # Workspace instructions for GitHub Copilot
@@ -27,6 +30,7 @@ terraform/
   outputs.tf                  # Exported resource IDs
   terraform.tfvars.example    # Template — copy to terraform.tfvars locally
 CONTRIBUTORS.md               # How to contribute and contributor list
+SECURITY.md                   # Security audit findings and vulnerability reporting
 ```
 
 ---
@@ -149,3 +153,9 @@ This repository uses HCP Terraform's VCS OAuth integration. Plan and apply runs 
 | Type | Name | Location | Description |
 |------|------|----------|-------------|
 | Environment variable | `DISCORD_TOKEN` | HCP Terraform → Workspace → Variables → Environment Variables | Discord bot token (sensitive). The provider reads this automatically — do **not** set it as a Terraform variable. |
+
+---
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for the pre-public-launch security audit findings and instructions on how to report a vulnerability privately.

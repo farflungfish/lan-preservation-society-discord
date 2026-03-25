@@ -1,0 +1,38 @@
+name: Feature Request
+description: Suggest an improvement or new feature for the server
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to improve the LAN Preservation Society Discord? We'd love to hear it!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: What problem does this feature solve, or what need does it address?
+      placeholder: e.g. There's nowhere to share retro game clips
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the change or feature you'd like to see.
+      placeholder: e.g. Add a #clips channel under GAMING for short video clips
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions or workarounds?
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Anything else that would help us understand the request.
+    validations:
+      required: false

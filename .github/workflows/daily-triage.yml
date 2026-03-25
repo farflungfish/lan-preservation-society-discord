@@ -1,0 +1,105 @@
+name: Daily Issue Triage
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 09:00 UTC every day
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+
+jobs:
+  triage:
+    name: Triage Open Issues
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run triage
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo  = context.repo.repo;
+            const now   = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+
+            // Fetch all open issues (not pull requests)
+            const allIssues = await github.paginate(
+              github.rest.issues.listForRepo,
+              { owner, repo, state: 'open', per_page: 100 }
+            );
+            const issues = allIssues.filter(i => !i.pull_request);
+
+            const stale       = [];
+            const noLabel     = [];
+            const noAssignee  = [];
+
+            for (const issue of issues) {
+              const updatedAt  = new Date(issue.updated_at).getTime();
+              const isStale    = (now - updatedAt) > oneDayMs;
+              const hasLabel   = issue.labels.length > 0;
+              const hasAssignee = issue.assignees.length > 0;
+
+              if (isStale)    stale.push(issue);
+              if (!hasLabel)  noLabel.push(issue);
+              if (!hasAssignee) noAssignee.push(issue);
+            }
+
+            const fmt = (list) =>
+              list.length
+                ? list.map(i => `- #${i.number} — **${i.title}** (last updated: ${i.updated_at.slice(0,10)})`).join('\n')
+                : '_None_';
+
+            const body = [
+              `## Daily Issue Triage — ${new Date().toISOString().slice(0, 10)}`,
+              '',
+              `**Total open issues:** ${issues.length}`,
+              '',
+              '### 🕐 No activity in the last 24 hours',
+              fmt(stale),
+              '',
+              '### 🏷️ Issues with no labels',
+              fmt(noLabel),
+              '',
+              '### 👤 Issues with no assignee',
+              fmt(noAssignee),
+            ].join('\n');
+
+            // Find an existing open triage issue to update, or create a new one
+            const triageTitle = 'Daily Triage Summary';
+            const existing = issues.find(
+              i => i.title === triageTitle && i.labels.some(l => l.name === 'triage')
+            );
+
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner, repo,
+                issue_number: existing.number,
+                body
+              });
+              core.info(`Updated triage issue #${existing.number}`);
+            } else {
+              // Ensure the triage label exists
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: 'triage' });
+              } catch (err) {
+                if (err.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner, repo,
+                    name: 'triage',
+                    color: 'e4e669',
+                    description: 'Daily triage summary'
+                  });
+                } else {
+                  throw err;
+                }
+              }
+
+              const created = await github.rest.issues.create({
+                owner, repo,
+                title: triageTitle,
+                body,
+                labels: ['triage']
+              });
+              core.info(`Created triage issue #${created.data.number}`);
+            }
