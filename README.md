@@ -42,6 +42,12 @@ CONTRIBUTORS.md               # How to contribute and contributor list
 
 **Roles**: Admin · Moderator · Bot · Member
 
+## Onboarding
+
+- New joiners land in #welcome and #rules. Read the pinned message in #rules and accept Discord's built-in rules prompt.
+- Once accepted, the rest of the server unlocks automatically—no manual promotion required.
+- Reacting with ✅ on the pinned rules message is an extra acknowledgement for mods to spot newcomers.
+
 ---
 
 ## Contributing
