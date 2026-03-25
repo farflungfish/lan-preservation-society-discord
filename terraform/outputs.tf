@@ -35,16 +35,6 @@ output "category_general_id" {
   value       = discord_category_channel.general.id
 }
 
-output "category_gaming_id" {
-  description = "ID of the GAMING category channel."
-  value       = discord_category_channel.gaming.id
-}
-
-output "category_preservation_id" {
-  description = "ID of the PRESERVATION category channel."
-  value       = discord_category_channel.preservation.id
-}
-
 # Key channel IDs
 output "channel_rules_id" {
   description = "ID of the #rules channel."
@@ -64,4 +54,9 @@ output "channel_general_chat_id" {
 output "channel_bug_reports_id" {
   description = "ID of the #bug-reports channel."
   value       = discord_text_channel.bug_reports.id
+}
+
+output "channel_community_voice_id" {
+  description = "ID of the Community Lounge voice channel."
+  value       = discord_voice_channel.community_voice.id
 }
