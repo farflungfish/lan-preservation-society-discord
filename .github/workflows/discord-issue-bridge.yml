@@ -79,13 +79,20 @@ jobs:
               await github.rest.issues.getLabel({ owner, repo, name: defaultLabel });
             } catch (error) {
               if (error.status === 404) {
-                await github.rest.issues.createLabel({
-                  owner,
-                  repo,
-                  name: defaultLabel,
-                  color: '5e5ef7',
-                  description: 'Requests created from Discord'
-                });
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: defaultLabel,
+                    color: '5e5ef7',
+                    description: 'Requests created from Discord'
+                  });
+                } catch (createError) {
+                  // 422 means the label already exists (created by a concurrent run); treat as success
+                  if (createError.status !== 422) {
+                    throw createError;
+                  }
+                }
               } else {
                 throw error;
               }

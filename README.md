@@ -36,7 +36,7 @@ CONTRIBUTORS.md               # How to contribute and contributor list
 | Category        | Channels                                            |
 |-----------------|-----------------------------------------------------|
 | INFORMATION     | #welcome, #rules, #announcements                    |
-| GENERAL         | #general-chat, #introductions, #off-topic           |
+| GENERAL         | #general-chat, #introductions, #off-topic, #bug-reports |
 | GAMING          | #gaming-general, #game-nights, #lan-events, 🔊 Gaming Lounge |
 | PRESERVATION    | #preservation-talk, #hardware-help, #software-help, 🔊 Preservation Lab |
 
