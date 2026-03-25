@@ -1,0 +1,125 @@
+name: Discord Issue Bridge
+
+on:
+  repository_dispatch:
+    types:
+      - discord_issue
+  workflow_dispatch:
+    inputs:
+      title:
+        description: "Issue title"
+        required: true
+        type: string
+      body:
+        description: "Issue body/description"
+        required: false
+        type: string
+      labels:
+        description: "Comma-separated labels (optional)"
+        required: false
+        type: string
+      discord_user:
+        description: "Discord username (optional)"
+        required: false
+        type: string
+      discord_channel:
+        description: "Discord channel name (optional)"
+        required: false
+        type: string
+      discord_message_url:
+        description: "Direct link to the Discord message (optional)"
+        required: false
+        type: string
+
+permissions:
+  issues: write
+
+jobs:
+  create-issue:
+    name: Create GitHub Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue from Discord payload
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const payload = context.eventName === 'workflow_dispatch'
+              ? context.payload.inputs
+              : (context.payload.client_payload || {});
+
+            const title = payload.title ? payload.title.trim() : '';
+            if (!title) {
+              throw new Error('A title is required (client_payload.title or workflow input).');
+            }
+
+            const toArray = (value) => {
+              if (!value) return [];
+              if (Array.isArray(value)) return value;
+              return String(value)
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean);
+            };
+
+            const rawLabels = toArray(payload.labels);
+            const defaultLabel = 'from-discord';
+            const allowedLabels = [defaultLabel];
+
+            let labels = rawLabels.filter((name) => allowedLabels.includes(name));
+            if (!labels.length) {
+              labels = [defaultLabel];
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Ensure the default Discord label exists; do not auto-create arbitrary labels
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: defaultLabel });
+            } catch (error) {
+              if (error.status === 404) {
+                try {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name: defaultLabel,
+                    color: '5e5ef7',
+                    description: 'Requests created from Discord'
+                  });
+                } catch (createError) {
+                  // 422 means the label already exists (created by a concurrent run); treat as success
+                  if (createError.status !== 422) {
+                    throw createError;
+                  }
+                }
+              } else {
+                throw error;
+              }
+            }
+
+            const originLines = [];
+            if (payload.discord_user) originLines.push(`**Requested by:** ${payload.discord_user}`);
+            if (payload.discord_channel) originLines.push(`**Channel:** ${payload.discord_channel}`);
+            if (payload.discord_message_url) originLines.push(`**Message:** ${payload.discord_message_url}`);
+
+            const bodyParts = [];
+            if (originLines.length) {
+              bodyParts.push(originLines.join('\n'));
+            }
+            if (payload.body && payload.body.trim()) {
+              bodyParts.push(payload.body.trim());
+            } else {
+              bodyParts.push('_No additional details supplied from Discord._');
+            }
+
+            const issue = await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body: bodyParts.join('\n\n'),
+              labels
+            });
+
+            core.setOutput('issue-number', issue.data.number);
+            core.info(`Created issue #${issue.data.number}: ${issue.data.html_url}`);

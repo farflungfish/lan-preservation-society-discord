@@ -36,7 +36,7 @@ CONTRIBUTORS.md               # How to contribute and contributor list
 | Category        | Channels                                            |
 |-----------------|-----------------------------------------------------|
 | INFORMATION     | #welcome, #rules, #announcements                    |
-| GENERAL         | #general-chat, #introductions, #off-topic           |
+| GENERAL         | #general-chat, #introductions, #off-topic, #bug-reports |
 | GAMING          | #gaming-general, #game-nights, #lan-events, 🔊 Gaming Lounge |
 | PRESERVATION    | #preservation-talk, #hardware-help, #software-help, 🔊 Preservation Lab |
 
@@ -75,6 +75,38 @@ You do **not** need to know Terraform to contribute.  This repository uses **Git
 GitHub Copilot uses the instructions in `.github/copilot-instructions.md` to understand this repository's conventions, so its suggestions will already follow the project's standards.
 
 See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full contribution guide.
+
+---
+
+## Create GitHub Issues from Discord
+
+The Discord bot can hand off requests directly into this repository by triggering a `repository_dispatch` event. A GitHub Actions workflow (`Discord Issue Bridge`) will convert the payload into a new issue.
+
+Use the `#bug-reports` channel in Discord to collect requests. Point your bot to mirror each message there into a GitHub `repository_dispatch` call using the payload below so the workflow files an issue automatically.
+
+1. **Create a GitHub token for the bot** — A fine-grained PAT with repository access to this repo is sufficient (Repository permissions: Contents **Read & Write**, Metadata **Read**). Store it safely on the bot side; it is **not** needed in this repository.
+2. **POST a dispatch event from Discord** whenever a request is captured:
+
+   ```bash
+   curl -X POST \
+     -H "Authorization: Bearer $GITHUB_PAT" \
+     -H "Accept: application/vnd.github+json" \
+     https://api.github.com/repos/farflungfish/lan-preservation-society-discord/dispatches \
+     -d '{
+       "event_type": "discord_issue",
+       "client_payload": {
+         "title": "Bug: game list not loading",
+         "body": "From @SomeUser in #bug-reports:\n\nThe game list page fails to load and shows an error.",
+         "labels": ["from-discord", "community-request"],
+         "discord_user": "SomeUser#1234",
+         "discord_channel": "#bug-reports",
+         "discord_message_url": "https://discord.com/channels/.../..."
+       }
+     }'
+   ```
+
+   Only `title` is required. `labels` defaults to `from-discord` if omitted; `discord_user`, `discord_channel`, and `discord_message_url` are optional metadata that will be included at the top of the issue body.
+3. **Test manually (optional)** — Trigger the workflow with `workflow_dispatch` inputs in the Actions tab to verify the bot payload format before wiring it up.
 
 ---
 
