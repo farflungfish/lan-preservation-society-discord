@@ -71,6 +71,7 @@ Agents are defined in `.github/agents/` and can be invoked in Copilot chat:
 
 | Agent | Invocation | Role |
 |-------|-----------|------|
+| `discord-community-agent` | `@discord-community-agent` | Discord domain expert; clarifies server structure, permissions, UX, then hands off to issue-consultant |
 | `issue-consultant` | `@issue-consultant` | Turns plain-English requests into structured GitHub Issues |
 | `terraform-developer` | `@terraform-developer` | Given an issue, writes Terraform code and opens a PR |
 | `code-reviewer` | `@code-reviewer` | Reviews a PR for correctness, naming, and security |
