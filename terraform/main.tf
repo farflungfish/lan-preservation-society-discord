@@ -103,6 +103,26 @@ resource "discord_text_channel" "announcements" {
   sync_perms_with_category = true
 }
 
+resource "discord_message" "public_launch_announcement" {
+  channel_id = discord_text_channel.announcements.id
+  content    = <<-EOT
+    📣 **Repository Public Launch — What's New**
+
+    We've just shipped a set of improvements to make it easier for everyone to contribute and stay informed:
+
+    🐛 **Issue Templates** — When you open a GitHub issue you'll now see structured forms for bug reports, feature requests, and general questions. Each type is automatically labelled so the right people get notified.
+
+    🔎 **Daily Triage** — A scheduled workflow runs every morning and flags open issues that have gone quiet, have no label, or have no assignee, keeping things moving.
+
+    🔒 **Security Audit** — A full pre-launch security review has been completed and documented in `SECURITY.md`. No credentials or sensitive data were found in the repository.
+
+    🤖 **Agent Routing** — GitHub Copilot agents are now assigned automatically based on issue labels, so bug reports, feature ideas, and community requests each get the right reviewer without manual triage.
+
+    See the full details in PR #25, or browse the updated README and SECURITY.md.
+  EOT
+  pinned     = true
+}
+
 # ---------------------------------------------------------------------------
 # CATEGORY: GENERAL
 # ---------------------------------------------------------------------------
