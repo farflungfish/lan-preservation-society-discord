@@ -78,6 +78,36 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full contribution guide.
 
 ---
 
+## Create GitHub Issues from Discord
+
+The Discord bot can hand off requests directly into this repository by triggering a `repository_dispatch` event. A GitHub Actions workflow (`Discord Issue Bridge`) will convert the payload into a new issue.
+
+1. **Create a GitHub token for the bot** — A fine-grained PAT with repository access to this repo is sufficient (Repository permissions: Contents **Read & Write**, Metadata **Read**). Store it safely on the bot side; it is **not** needed in this repository.
+2. **POST a dispatch event from Discord** whenever a request is captured:
+
+   ```bash
+   curl -X POST \
+     -H "Authorization: Bearer $GITHUB_PAT" \
+     -H "Accept: application/vnd.github+json" \
+     https://api.github.com/repos/farflungfish/lan-preservation-society-discord/dispatches \
+     -d '{
+       "event_type": "discord_issue",
+       "client_payload": {
+         "title": "Request: new #bug-reports channel",
+         "body": "From @SomeUser in #suggestions:\n\nAdd a dedicated place to report issues.",
+         "labels": ["from-discord", "community-request"],
+         "discord_user": "SomeUser#1234",
+         "discord_channel": "#suggestions",
+         "discord_message_url": "https://discord.com/channels/.../..."
+       }
+     }'
+   ```
+
+   Only `title` is required. `labels` defaults to `from-discord` if omitted; `discord_user`, `discord_channel`, and `discord_message_url` are optional metadata that will be included at the top of the issue body.
+3. **Test manually (optional)** — Trigger the workflow with `workflow_dispatch` inputs in the Actions tab to verify the bot payload format before wiring it up.
+
+---
+
 ## PR Pipeline
 
 Every pull request targeting `main` automatically runs:
