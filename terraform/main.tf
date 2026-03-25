@@ -46,20 +46,11 @@ resource "discord_category_channel" "information" {
   position  = 0
 }
 
-resource "discord_text_channel" "welcome" {
-  server_id                = var.server_id
-  name                     = "welcome"
-  topic                    = "Welcome to the LAN Preservation Society! Read the rules here and accept them to unlock the rest of the server."
-  position                 = 0
-  category                 = discord_category_channel.information.id
-  sync_perms_with_category = true
-}
-
 resource "discord_text_channel" "rules" {
   server_id                = var.server_id
   name                     = "rules"
   topic                    = "Server rules and guidelines. Accept these rules to gain access to the rest of the server."
-  position                 = 1
+  position                 = 0
   category                 = discord_category_channel.information.id
   sync_perms_with_category = true
 }
@@ -98,7 +89,7 @@ resource "discord_text_channel" "announcements" {
   server_id                = var.server_id
   name                     = "announcements"
   topic                    = "Official announcements from the server team."
-  position                 = 2
+  position                 = 1
   category                 = discord_category_channel.information.id
   sync_perms_with_category = true
 }
@@ -121,29 +112,11 @@ resource "discord_text_channel" "general_chat" {
   sync_perms_with_category = true
 }
 
-resource "discord_text_channel" "introductions" {
-  server_id                = var.server_id
-  name                     = "introductions"
-  topic                    = "Introduce yourself to the community!"
-  position                 = 1
-  category                 = discord_category_channel.general.id
-  sync_perms_with_category = true
-}
-
-resource "discord_text_channel" "off_topic" {
-  server_id                = var.server_id
-  name                     = "off-topic"
-  topic                    = "Everything that doesn't fit anywhere else."
-  position                 = 2
-  category                 = discord_category_channel.general.id
-  sync_perms_with_category = true
-}
-
 resource "discord_text_channel" "bug_reports" {
   server_id = var.server_id
   name      = "bug-reports"
   topic     = "Report server issues and requests. Messages are mirrored to GitHub issues."
-  position  = 3
+  position  = 1
   category  = discord_category_channel.general.id
 }
 
@@ -156,29 +129,11 @@ resource "discord_category_channel" "gaming" {
   position  = 2
 }
 
-resource "discord_text_channel" "gaming_general" {
-  server_id                = var.server_id
-  name                     = "gaming-general"
-  topic                    = "General gaming discussion."
-  position                 = 0
-  category                 = discord_category_channel.gaming.id
-  sync_perms_with_category = true
-}
-
-resource "discord_text_channel" "game_nights" {
-  server_id                = var.server_id
-  name                     = "game-nights"
-  topic                    = "Organise and discuss upcoming game nights."
-  position                 = 1
-  category                 = discord_category_channel.gaming.id
-  sync_perms_with_category = true
-}
-
 resource "discord_text_channel" "lan_events" {
   server_id                = var.server_id
   name                     = "lan-events"
   topic                    = "Plan and recap LAN events — past and future."
-  position                 = 2
+  position                 = 0
   category                 = discord_category_channel.gaming.id
   sync_perms_with_category = true
 }
@@ -186,7 +141,7 @@ resource "discord_text_channel" "lan_events" {
 resource "discord_voice_channel" "gaming_voice" {
   server_id                = var.server_id
   name                     = "Gaming Lounge"
-  position                 = 3
+  position                 = 1
   category                 = discord_category_channel.gaming.id
   sync_perms_with_category = true
 }
@@ -205,32 +160,6 @@ resource "discord_text_channel" "preservation_talk" {
   name                     = "preservation-talk"
   topic                    = "Discussion about preserving games, hardware, and software history."
   position                 = 0
-  category                 = discord_category_channel.preservation.id
-  sync_perms_with_category = true
-}
-
-resource "discord_text_channel" "hardware_help" {
-  server_id                = var.server_id
-  name                     = "hardware-help"
-  topic                    = "Get help with retro and legacy hardware."
-  position                 = 1
-  category                 = discord_category_channel.preservation.id
-  sync_perms_with_category = true
-}
-
-resource "discord_text_channel" "software_help" {
-  server_id                = var.server_id
-  name                     = "software-help"
-  topic                    = "Get help with retro and legacy software, emulation, and compatibility."
-  position                 = 2
-  category                 = discord_category_channel.preservation.id
-  sync_perms_with_category = true
-}
-
-resource "discord_voice_channel" "preservation_voice" {
-  server_id                = var.server_id
-  name                     = "Preservation Lab"
-  position                 = 3
   category                 = discord_category_channel.preservation.id
   sync_perms_with_category = true
 }
