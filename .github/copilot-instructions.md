@@ -13,8 +13,11 @@ All Discord server structure changes (channels, roles, categories, permissions) 
 ```text
 .github/
   agents/                     # Copilot agent definitions (see below)
+  ISSUE_TEMPLATE/             # Issue templates (bug, feature, question)
   workflows/
     pr-validation.yml         # Runs on every PR: fmt → validate → tflint
+    daily-triage.yml          # Runs daily: flags stale/unlabelled issues
+    discord-issue-bridge.yml  # Creates GitHub issues from Discord dispatches
   CODEOWNERS                  # @farflungfish must review all changes
   PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
   copilot-instructions.md     # This file
@@ -26,6 +29,7 @@ terraform/
   terraform.tfvars.example    # Variable template — copy to terraform.tfvars locally
 CONTRIBUTORS.md               # Contributor guide
 README.md                     # Project overview
+SECURITY.md                   # Security audit findings and vulnerability reporting
 ```
 
 ---
@@ -76,6 +80,27 @@ Agents are defined in `.github/agents/` and can be invoked in Copilot chat:
 | `terraform-developer` | `@terraform-developer` | Given an issue, writes Terraform code and opens a PR |
 | `code-reviewer` | `@code-reviewer` | Reviews a PR for correctness, naming, and security |
 | `repo-manager` | `@repo-manager` | Housekeeping: labels, milestones, stale issues, PR nudges |
+
+---
+
+## Agent Assignment Criteria
+
+When an issue is opened, assign agents based on the issue label:
+
+| Label | Assigned Agent | Rationale |
+| ----- | -------------- | --------- |
+| `bug` | `@code-reviewer` | Investigates the reported problem; if it requires a Terraform change, hands off to `@terraform-developer` |
+| `enhancement` | `@discord-community-agent` → `@terraform-developer` | Community agent clarifies requirements; developer implements |
+| `question` | `@discord-community-agent` | Answers server-structure questions; escalates to developer if config change is needed |
+| `from-discord` | `@issue-consultant` | Formats and categorises the Discord-originated request before routing to the appropriate agent |
+| `triage` | `@repo-manager` | Reviews the daily triage summary and takes housekeeping actions |
+
+**General rules:**
+
+- Issues labelled `bug` always get a `@code-reviewer` pass first — confirm before implementing a fix.
+- Issues with no label are flagged in the daily triage and should be labelled before assigning an agent.
+- Issues labelled `from-discord` need to be categorised (bug / enhancement / question) before an agent can act on them; `@issue-consultant` should do this.
+- Any issue that results in a Terraform change must go through `@terraform-developer` to produce a PR.
 
 ---
 

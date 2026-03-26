@@ -56,6 +56,11 @@ output "channel_announcements_id" {
   value       = discord_text_channel.announcements.id
 }
 
+output "message_public_launch_announcement_id" {
+  description = "ID of the public launch announcement message in #announcements."
+  value       = discord_message.public_launch_announcement.id
+}
+
 output "channel_general_chat_id" {
   description = "ID of the #general-chat channel."
   value       = discord_text_channel.general_chat.id
