@@ -138,7 +138,7 @@ resource "discord_text_channel" "lan_events" {
   sync_perms_with_category = true
 }
 
-resource "discord_voice_channel" "gaming_voice" {
+resource "discord_voice_channel" "gaming_lounge" {
   server_id                = var.server_id
   name                     = "Gaming Lounge"
   position                 = 1

@@ -65,3 +65,18 @@ output "channel_bug_reports_id" {
   description = "ID of the #bug-reports channel."
   value       = discord_text_channel.bug_reports.id
 }
+
+output "channel_lan_events_id" {
+  description = "ID of the #lan-events channel."
+  value       = discord_text_channel.lan_events.id
+}
+
+output "channel_preservation_talk_id" {
+  description = "ID of the #preservation-talk channel."
+  value       = discord_text_channel.preservation_talk.id
+}
+
+output "voice_gaming_lounge_id" {
+  description = "ID of the Gaming Lounge voice channel."
+  value       = discord_voice_channel.gaming_lounge.id
+}
