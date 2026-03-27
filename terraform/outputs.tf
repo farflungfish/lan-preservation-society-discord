@@ -30,18 +30,13 @@ output "channel_announcements_id" {
   value       = discord_text_channel.announcements.id
 }
 
-output "channel_rules_id" {
-  description = "ID of the #rules channel."
-  value       = discord_text_channel.rules.id
-}
-
 output "channel_text_id" {
   description = "ID of the #text channel."
   value       = discord_text_channel.text.id
 }
 
 output "channel_voice_id" {
-  description = "ID of the Voice channel."
+  description = "ID of the #voice channel."
   value       = discord_voice_channel.voice.id
 }
 
@@ -51,7 +46,7 @@ output "message_minimal_start_announcement_id" {
   value       = discord_message.minimal_start_announcement.id
 }
 
-output "message_rules_id" {
-  description = "ID of the pinned rules message in #rules."
-  value       = discord_message.rules_message.id
+output "message_rule_id" {
+  description = "ID of the pinned rule message in #text."
+  value       = discord_message.rule.id
 }
