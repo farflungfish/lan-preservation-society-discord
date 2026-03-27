@@ -38,17 +38,56 @@ resource "discord_role" "member" {
 }
 
 # ---------------------------------------------------------------------------
-# Channels — minimal start: one text, one voice
+# Channels — minimal start
 # ---------------------------------------------------------------------------
+resource "discord_text_channel" "announcements" {
+  server_id = var.server_id
+  name      = "announcements"
+  topic     = "Server announcements and updates."
+  position  = 0
+}
+
+resource "discord_message" "minimal_start_announcement" {
+  channel_id = discord_text_channel.announcements.id
+  content    = <<-EOT
+    📣 **Minimal Start**
+
+    The server has been stripped back to basics: three text channels, one voice channel, and one rule. No categories, no hierarchy — just a place to hang out and build from.
+
+    - **#announcements** — server updates
+    - **#rules** — the one rule
+    - **#text** — general chat
+    - **Voice** — come hang out
+
+    Everyone who joins can use all channels unconditionally.
+
+    **The rule:** Don't be a dick.
+  EOT
+  pinned     = true
+}
+
+resource "discord_text_channel" "rules" {
+  server_id = var.server_id
+  name      = "rules"
+  topic     = "The one rule."
+  position  = 1
+}
+
+resource "discord_message" "rules_message" {
+  channel_id = discord_text_channel.rules.id
+  content    = "Don't be a dick."
+  pinned     = true
+}
+
 resource "discord_text_channel" "text" {
   server_id = var.server_id
   name      = "text"
   topic     = "General conversation."
-  position  = 0
+  position  = 2
 }
 
 resource "discord_voice_channel" "voice" {
   server_id = var.server_id
   name      = "Voice"
-  position  = 1
+  position  = 3
 }
