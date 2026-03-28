@@ -46,7 +46,7 @@ output "message_minimal_start_announcement_id" {
   value       = discord_message.minimal_start_announcement.id
 }
 
-output "message_rule_id" {
+output "message_rules_id" {
   description = "ID of the pinned rule message in #text."
-  value       = discord_message.rule.id
+  value       = discord_message.rules_message.id
 }

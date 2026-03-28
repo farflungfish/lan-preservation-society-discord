@@ -55,7 +55,7 @@ resource "discord_message" "minimal_start_announcement" {
     The server has been stripped back to basics: two text channels, one voice channel, and one rule. No categories, no hierarchy — just a place to hang out and build from.
 
     - **#announcements** — server updates
-    - **#text** — general chat (rule pinned here)
+    - **#text** — general chat (the rule is pinned here)
     - **#voice** — come hang out
 
     Everyone who joins can use all channels unconditionally.
@@ -70,7 +70,7 @@ resource "discord_text_channel" "text" {
   position  = 1
 }
 
-resource "discord_message" "rule" {
+resource "discord_message" "rules_message" {
   channel_id = discord_text_channel.text.id
   content    = "Don't be a dick."
   pinned     = true
