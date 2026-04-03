@@ -8,6 +8,10 @@ resource "discord_role" "admin" {
   hoist       = true
   mentionable = true
   permissions = 8 # Administrator
+
+  lifecycle {
+    ignore_changes = [position]
+  }
 }
 
 resource "discord_role" "moderator" {
@@ -17,6 +21,10 @@ resource "discord_role" "moderator" {
   hoist       = true
   mentionable = true
   permissions = 1275853888 # Manage messages, kick, ban, mute, deafen, move members
+
+  lifecycle {
+    ignore_changes = [position]
+  }
 }
 
 resource "discord_role" "bot" {
@@ -26,6 +34,10 @@ resource "discord_role" "bot" {
   hoist       = true
   mentionable = false
   permissions = 805306368 # Send messages, embed links, attach files, read message history
+
+  lifecycle {
+    ignore_changes = [position]
+  }
 }
 
 resource "discord_role" "member" {
@@ -35,6 +47,10 @@ resource "discord_role" "member" {
   hoist       = false
   mentionable = false
   permissions = 104324160 # View channels, send messages, read message history, add reactions, connect, speak
+
+  lifecycle {
+    ignore_changes = [position]
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -61,6 +77,10 @@ resource "discord_text_channel" "text" {
   name      = "text"
   topic     = "General conversation."
   position  = 1
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category]
+  }
 }
 
 resource "discord_message" "rules_message" {
@@ -73,6 +93,10 @@ resource "discord_voice_channel" "voice" {
   server_id = var.server_id
   name      = "voice"
   position  = 2
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category, user_limit]
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -82,6 +106,10 @@ resource "discord_category_channel" "project_zomboid" {
   server_id = var.server_id
   name      = "PROJECT ZOMBOID"
   position  = 3
+
+  lifecycle {
+    ignore_changes = [position]
+  }
 }
 
 resource "discord_text_channel" "zomboid_text" {
@@ -90,11 +118,15 @@ resource "discord_text_channel" "zomboid_text" {
   topic     = "Project Zomboid server details and event updates."
   position  = 0
   category  = discord_category_channel.project_zomboid.id
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category]
+  }
 }
 
 resource "discord_message" "zomboid_server_details" {
   channel_id = discord_text_channel.zomboid_text.id
-  content    = <<-EOT
+  content = trimspace(<<-EOT
     📣 **Project Zomboid Server Details**
 
     Server: `windurst.ddns.net:16261`
@@ -102,7 +134,8 @@ resource "discord_message" "zomboid_server_details" {
 
     Regular events will be announced here.
   EOT
-  pinned     = true
+  )
+  pinned = true
 }
 
 resource "discord_voice_channel" "zomboid_voice" {
@@ -110,4 +143,8 @@ resource "discord_voice_channel" "zomboid_voice" {
   name      = "Zomboid Voice"
   position  = 1
   category  = discord_category_channel.project_zomboid.id
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category, user_limit]
+  }
 }
