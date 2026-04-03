@@ -40,27 +40,20 @@ resource "discord_role" "member" {
 # ---------------------------------------------------------------------------
 # Channels — minimal start
 # ---------------------------------------------------------------------------
-resource "discord_text_channel" "announcements" {
-  server_id = var.server_id
-  name      = "announcements"
-  topic     = "Server announcements and updates."
-  position  = 0
+
+# #announcements was deleted from Discord directly; remove from state only.
+removed {
+  from = discord_text_channel.announcements
+  lifecycle {
+    destroy = false
+  }
 }
 
-resource "discord_message" "minimal_start_announcement" {
-  channel_id = discord_text_channel.announcements.id
-  content    = <<-EOT
-    📣 **Minimal Start**
-
-    The server has been stripped back to basics: two text channels, one voice channel, and one rule. No categories, no hierarchy — just a place to hang out and build from.
-
-    - **#announcements** — server updates
-    - **#text** — general chat (the rule is pinned here)
-    - **#voice** — come hang out
-
-    Everyone who joins can use all channels unconditionally.
-  EOT
-  pinned     = true
+removed {
+  from = discord_message.minimal_start_announcement
+  lifecycle {
+    destroy = false
+  }
 }
 
 resource "discord_text_channel" "text" {

@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   # ------------------------------------------------------------------
@@ -123,3 +124,69 @@ jobs:
         if: steps.check-tf.outputs.has_terraform == 'true'
         working-directory: terraform
         run: tflint --format compact
+
+  # ------------------------------------------------------------------
+  # Terraform plan — runs against HCP Terraform and posts output as
+  # a sticky PR comment so reviewers can see the diff inline.
+  # ------------------------------------------------------------------
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    needs: [terraform-validate, tflint]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for Terraform files
+        id: check-tf
+        run: |
+          if [ -d terraform ] && find terraform -name "*.tf" | grep -q .; then
+            echo "has_terraform=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_terraform=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Terraform
+        if: steps.check-tf.outputs.has_terraform == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.9"
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        if: steps.check-tf.outputs.has_terraform == 'true'
+        working-directory: terraform
+        env:
+          TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        if: steps.check-tf.outputs.has_terraform == 'true'
+        id: plan
+        working-directory: terraform
+        env:
+          TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
+        # continue-on-error so the comment step always runs, even on plan failure;
+        # the "Fail if plan failed" step re-surfaces the error afterwards.
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+
+      - name: Post plan as PR comment
+        if: steps.check-tf.outputs.has_terraform == 'true'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: terraform-plan
+          message: |
+            ### 📋 Terraform Plan — `${{ steps.plan.outcome }}`
+
+            <details><summary>Show plan output</summary>
+
+            ```
+            ${{ steps.plan.outputs.stdout }}${{ steps.plan.outputs.stderr }}
+            ```
+
+            </details>
+
+      - name: Fail if plan failed
+        if: steps.check-tf.outputs.has_terraform == 'true' && steps.plan.outcome == 'failure'
+        run: exit 1
