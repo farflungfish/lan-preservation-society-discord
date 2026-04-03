@@ -84,30 +84,29 @@ resource "discord_category_channel" "project_zomboid" {
   position  = 3
 }
 
-resource "discord_text_channel" "zomboid_text" {
+resource "discord_text_channel" "project_zomboid" {
   server_id = var.server_id
-  name      = "zomboid-text"
-  topic     = "Project Zomboid server details and event updates."
+  name      = "project-zomboid"
+  topic     = "Project Zomboid server info and coordination. Address: windurst.ddns.net:16261. Password shared here when rotated and pinned."
   position  = 0
   category  = discord_category_channel.project_zomboid.id
 }
 
-resource "discord_message" "zomboid_server_details" {
-  channel_id = discord_text_channel.zomboid_text.id
+resource "discord_message" "project_zomboid_details" {
+  channel_id = discord_text_channel.project_zomboid.id
   content    = <<-EOT
-    📣 **Project Zomboid Server Details**
+    🧟 **Project Zomboid Server**
 
-    Server: `windurst.ddns.net:16261`
-    Password: shared in this channel when rotated and pinned to the top.
-
-    Regular events will be announced here.
+    - Address: `windurst.ddns.net:16261`
+    - Password: A password is required; the current password will be shared in this channel and kept pinned when rotated.
+    - Notes: Event coordination and bot updates for the Zomboid server live here.
   EOT
   pinned     = true
 }
 
-resource "discord_voice_channel" "zomboid_voice" {
+resource "discord_voice_channel" "project_zomboid" {
   server_id = var.server_id
-  name      = "Zomboid Voice"
+  name      = "🔊 Project Zomboid"
   position  = 1
   category  = discord_category_channel.project_zomboid.id
 }

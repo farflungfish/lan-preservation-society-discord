@@ -43,7 +43,7 @@ SECURITY.md                   # Security audit findings and vulnerability report
 | GENERAL         | #general-chat, #introductions, #off-topic, #bug-reports |
 | GAMING          | #gaming-general, #game-nights, #lan-events, 🔊 Gaming Lounge |
 | PRESERVATION    | #preservation-talk, #hardware-help, #software-help, 🔊 Preservation Lab |
-| PROJECT ZOMBOID | #zomboid-text, 🔊 Zomboid Voice                     |
+| PROJECT ZOMBOID | #project-zomboid, 🔊 Project Zomboid               |
 
 **Roles**: Admin · Moderator · Bot · Member
 

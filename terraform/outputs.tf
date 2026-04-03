@@ -41,14 +41,14 @@ output "category_project_zomboid_id" {
   value       = discord_category_channel.project_zomboid.id
 }
 
-output "channel_zomboid_text_id" {
-  description = "ID of the #zomboid-text channel."
-  value       = discord_text_channel.zomboid_text.id
+output "channel_project_zomboid_text_id" {
+  description = "ID of the #project-zomboid text channel."
+  value       = discord_text_channel.project_zomboid.id
 }
 
-output "channel_zomboid_voice_id" {
-  description = "ID of the Zomboid voice channel."
-  value       = discord_voice_channel.zomboid_voice.id
+output "channel_project_zomboid_voice_id" {
+  description = "ID of the 🔊 Project Zomboid voice channel."
+  value       = discord_voice_channel.project_zomboid.id
 }
 
 # Pinned message IDs
@@ -57,7 +57,7 @@ output "message_rules_id" {
   value       = discord_message.rules_message.id
 }
 
-output "message_zomboid_server_details_id" {
-  description = "ID of the pinned Project Zomboid server details message in #zomboid-text."
-  value       = discord_message.zomboid_server_details.id
+output "message_project_zomboid_details_id" {
+  description = "ID of the pinned Project Zomboid server details message."
+  value       = discord_message.project_zomboid_details.id
 }
