@@ -157,7 +157,7 @@ jobs:
         if: steps.check-tf.outputs.has_terraform == 'true'
         working-directory: terraform
         env:
-          TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
+          TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
         run: terraform init -input=false
 
       - name: Terraform Plan
@@ -165,7 +165,7 @@ jobs:
         id: plan
         working-directory: terraform
         env:
-          TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
+          TF_CLOUD_ORGANIZATION: ${{ vars.TF_CLOUD_ORGANIZATION }}
         # continue-on-error so the comment step always runs, even on plan failure;
         # the "Fail if plan failed" step re-surfaces the error afterwards.
         run: terraform plan -no-color -input=false
