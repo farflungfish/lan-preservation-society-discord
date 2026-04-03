@@ -81,39 +81,3 @@ resource "discord_voice_channel" "voice" {
   name      = "voice"
   position  = 2
 }
-
-# ---------------------------------------------------------------------------
-# Project Zomboid
-# ---------------------------------------------------------------------------
-resource "discord_category_channel" "project_zomboid" {
-  server_id = var.server_id
-  name      = "PROJECT ZOMBOID"
-  position  = 3
-}
-
-resource "discord_text_channel" "project_zomboid" {
-  server_id = var.server_id
-  name      = "project-zomboid"
-  topic     = "Project Zomboid server info and coordination. Address: windurst.ddns.net:16261. Password shared here when rotated and pinned."
-  category  = discord_category_channel.project_zomboid.id
-  position  = 0
-}
-
-resource "discord_message" "project_zomboid_details" {
-  channel_id = discord_text_channel.project_zomboid.id
-  content    = <<-EOT
-    🧟 **Project Zomboid Server**
-
-    - Address: `windurst.ddns.net:16261`
-    - Password: A password is required; the current password will be shared in this channel and kept pinned when rotated.
-    - Notes: Event coordination and bot updates for the Zomboid server live here.
-  EOT
-  pinned     = true
-}
-
-resource "discord_voice_channel" "project_zomboid" {
-  server_id = var.server_id
-  name      = "🔊 Project Zomboid"
-  category  = discord_category_channel.project_zomboid.id
-  position  = 1
-}
