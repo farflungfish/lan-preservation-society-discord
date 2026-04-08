@@ -51,12 +51,6 @@ output "channel_zomboid_voice_id" {
   value       = discord_voice_channel.zomboid_voice.id
 }
 
-# Pinned message IDs
-output "message_rules_id" {
-  description = "ID of the pinned rule message in #text."
-  value       = discord_message.rules_message.id
-}
-
 output "message_zomboid_server_details_id" {
   description = "ID of the pinned Project Zomboid server details message in #zomboid-text."
   value       = discord_message.zomboid_server_details.id

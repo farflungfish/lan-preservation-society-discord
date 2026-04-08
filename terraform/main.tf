@@ -83,12 +83,6 @@ resource "discord_text_channel" "text" {
   }
 }
 
-resource "discord_message" "rules_message" {
-  channel_id = discord_text_channel.text.id
-  content    = "Don't be a dick."
-  pinned     = true
-}
-
 resource "discord_voice_channel" "voice" {
   server_id = var.server_id
   name      = "voice"
