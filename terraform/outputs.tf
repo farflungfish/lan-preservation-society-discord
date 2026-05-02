@@ -24,17 +24,6 @@ output "role_bot_id" {
   value       = discord_role.bot.id
 }
 
-# Channel IDs
-output "channel_text_id" {
-  description = "ID of the #text channel."
-  value       = discord_text_channel.text.id
-}
-
-output "channel_voice_id" {
-  description = "ID of the #voice channel."
-  value       = discord_voice_channel.voice.id
-}
-
 # Project Zomboid
 output "category_project_zomboid_id" {
   description = "ID of the PROJECT ZOMBOID category."

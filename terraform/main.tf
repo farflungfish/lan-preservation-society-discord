@@ -72,27 +72,6 @@ removed {
   }
 }
 
-resource "discord_text_channel" "text" {
-  server_id = var.server_id
-  name      = "text"
-  topic     = "General conversation."
-  position  = 1
-
-  lifecycle {
-    ignore_changes = [position, sync_perms_with_category]
-  }
-}
-
-resource "discord_voice_channel" "voice" {
-  server_id = var.server_id
-  name      = "voice"
-  position  = 2
-
-  lifecycle {
-    ignore_changes = [position, sync_perms_with_category, user_limit]
-  }
-}
-
 # ---------------------------------------------------------------------------
 # Channels — Project Zomboid
 # ---------------------------------------------------------------------------
