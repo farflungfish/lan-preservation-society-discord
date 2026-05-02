@@ -142,3 +142,39 @@ resource "discord_voice_channel" "zomboid_voice" {
     ignore_changes = [position, sync_perms_with_category, user_limit]
   }
 }
+
+# ---------------------------------------------------------------------------
+# Channels — The Workbench
+# ---------------------------------------------------------------------------
+resource "discord_category_channel" "the_workbench" {
+  server_id = var.server_id
+  name      = "THE WORKBENCH"
+  position  = 4
+
+  lifecycle {
+    ignore_changes = [position]
+  }
+}
+
+resource "discord_text_channel" "the_workbench_text" {
+  server_id = var.server_id
+  name      = "the-workbench-text"
+  topic     = "PC troubleshooting, hardware and software support, networking, and help getting older LAN setups working."
+  position  = 0
+  category  = discord_category_channel.the_workbench.id
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category]
+  }
+}
+
+resource "discord_voice_channel" "the_workbench_voice" {
+  server_id = var.server_id
+  name      = "The Workbench Voice"
+  position  = 1
+  category  = discord_category_channel.the_workbench.id
+
+  lifecycle {
+    ignore_changes = [position, sync_perms_with_category, user_limit]
+  }
+}

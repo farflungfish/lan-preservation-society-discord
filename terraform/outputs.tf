@@ -55,3 +55,19 @@ output "message_zomboid_server_details_id" {
   description = "ID of the pinned Project Zomboid server details message in #zomboid-text."
   value       = discord_message.zomboid_server_details.id
 }
+
+# The Workbench
+output "category_the_workbench_id" {
+  description = "ID of the THE WORKBENCH category."
+  value       = discord_category_channel.the_workbench.id
+}
+
+output "channel_the_workbench_text_id" {
+  description = "ID of the #the-workbench-text channel."
+  value       = discord_text_channel.the_workbench_text.id
+}
+
+output "channel_the_workbench_voice_id" {
+  description = "ID of the The Workbench Voice channel."
+  value       = discord_voice_channel.the_workbench_voice.id
+}
