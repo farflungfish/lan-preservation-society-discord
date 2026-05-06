@@ -16,7 +16,7 @@ All Discord server structure changes (channels, roles, categories, permissions) 
   ISSUE_TEMPLATE/             # Issue templates (bug, feature, question)
   workflows/
     pr-validation.yml         # Runs on every PR: fmt → validate → tflint
-    daily-triage.yml          # Runs daily: flags stale/unlabelled issues
+    issue-triage.yml          # Runs every Monday: flags stale/unlabelled issues
     discord-issue-bridge.yml  # Creates GitHub issues from Discord dispatches
   CODEOWNERS                  # @farflungfish must review all changes
   PULL_REQUEST_TEMPLATE.md    # Standard PR checklist
@@ -93,12 +93,12 @@ When an issue is opened, assign agents based on the issue label:
 | `enhancement` | `@discord-community-agent` → `@terraform-developer` | Community agent clarifies requirements; developer implements |
 | `question` | `@discord-community-agent` | Answers server-structure questions; escalates to developer if config change is needed |
 | `from-discord` | `@issue-consultant` | Formats and categorises the Discord-originated request before routing to the appropriate agent |
-| `triage` | `@repo-manager` | Reviews the daily triage summary and takes housekeeping actions |
+| `triage` | `@repo-manager` | Reviews the weekly triage summary and takes housekeeping actions |
 
 **General rules:**
 
 - Issues labelled `bug` always get a `@code-reviewer` pass first — confirm before implementing a fix.
-- Issues with no label are flagged in the daily triage and should be labelled before assigning an agent.
+- Issues with no label are flagged in the weekly triage and should be labelled before assigning an agent.
 - Issues labelled `from-discord` need to be categorised (bug / enhancement / question) before an agent can act on them; `@issue-consultant` should do this.
 - Any issue that results in a Terraform change must go through `@terraform-developer` to produce a PR.
 
